@@ -5,7 +5,7 @@ output:
     toc: yes
     toc_depth: 3
     toc_float: 
-     collapsed: false
+     collapsed: false     
 date: "2024-09-02"
 theme: Cerulean
 params: 
@@ -16,8 +16,19 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+
+site_name <- params$site_name
+
 ```
+
+<style type="text/css">
+.main-container {
+  max-width: 80% !important;
+  margin: auto;
+}
+</style>
+
 
 ### Abstract
 
@@ -47,6 +58,12 @@ methodology. The data was further analysed to create a cohort of
 patients who were of minor acuity and recieved low level investigations
 and treatments.
 
+```{r, echo=FALSE,  fig.height=6,fig.width = 16}
+flow
+
+
+```
+
 This cohort was then further analyised to identify characteristics of
 these patients using cluster analysis to try to identify key groups of
 patients. This included demographic, geographic and time attendance
@@ -60,6 +77,51 @@ This report utilises an avoidable attendances methodology to help
 identify a middle ground of patients. These are a cohort of patients who
 are non ambulance conveyances to a type 1
 
+### Benchmarking change over time {.tabset .tabset-fade .tabset-pills}
+
+These charts look at the last 6 months of attendances and compare them to the same 6 months a year ago.  The percentage change is then calculated.  This is broken down across the various attendance types we have identified.  
+
+We are most interested in this study for the change in divertible attendances.The other types are provided for context.  Further in the report we can see this in a more traditional time series for this individual site.
+
+#### Total Attendances
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+bench_to
+
+
+```
+
+#### Avoidable Attendances
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+bench_aa
+
+
+```
+
+#### Divertable Attendances
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+bench_da
+
+
+```
+
+
+#### Appropriate Attendances (Discharged)
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+bench_ap 
+
+
+```
+
+
+#### Appropriate Attendances (Admissions)
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+bench_ad 
+
+
+```
+
+
+
 ### Appendix:
 
 Data sources: [Reporting].[MESH_ECDS_EC_Core]
@@ -72,7 +134,7 @@ was used to account for outliers. Any patients where their time to treat
 was longer than their discharge time were removed.
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+data_summary_table
 ```
 
 ### Benchmarking
@@ -113,28 +175,6 @@ by the dots, are considered outliers.
 
 ```{r echo=FALSE, results='hide',fig.asp = 0.8, fig.height=10,fig.width = 12,message=FALSE, warnings = FALSE}
 ##box plot by year
-data_time_filtered_resource %>%
-  ggplot(aes(x=site_name, y= Resource_Time , group = site_name)) +
-  geom_boxplot(fill = "#41B6E6") +
-  
-  labs(title = "Resource Time (Time to discharge - minus time to treatment)",
-       subtitle = "",
-       caption = "For treatment times within the 95th Percentile to account for extreme outliers",
-       x = "",  
-       y = "Time in minutes") +
-  theme_minimal(base_size = 15)+
-  theme(strip.text.x = element_text(size = 15, colour = "Black", face ="bold"))+
-  theme(panel.grid.minor = element_blank())+
-  theme(panel.border=element_blank())+
-  theme( panel.grid.major = element_blank ())+ 
-  theme(plot.title = element_text(size = 15,
-                                  face = "bold",
-                                  margin = margin(10,0,10,0),
-                                  family = "sans"))+
-  theme(axis.line = element_line(color = "grey"))+
-  theme(axis.text.x = element_text(angle = 90))+
-  theme(legend.position = "")
-
 
 ```
 
@@ -143,32 +183,6 @@ data_time_filtered_resource %>%
 The below chart shows a comparison of three six month time periods.
 
 ```{r echo=FALSE, results='hide',fig.asp = 0.8, fig.height=10,fig.width = 12,message=FALSE, warnings = FALSE}
-plotdata3 <- data_time_filtered_resource  %>%
-  filter (site_name == params$site_name)
-
-##box plot by site and month split - only works properly in loop
-data_time_filtered_resource %>%
-  ggplot(aes(x=mths_ago, y= Resource_Time , group = mths_ago,fill=mths_ago)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("#005EB8","#41B6E6","#0072CE"))+
-  
-  labs(title = "Resource Time (Time to discharge - minus time to treatment)",
-       subtitle = "",
-       caption = "For treatment times within the 95th Percentile to account for extreme outliers",
-       x = "",  
-       y = "Time in minutes") +
-  theme_minimal(base_size = 15)+
-  theme(strip.text.x = element_text(size = 15, colour = "Black", face ="bold"))+
-  theme(panel.grid.minor = element_blank())+
-  theme(panel.border=element_blank())+
-  theme( panel.grid.major = element_blank ())+ 
-  theme(plot.title = element_text(size = 15,
-                                  face = "bold",
-                                  margin = margin(10,0,10,0),
-                                  family = "sans"))+
-  theme(axis.line = element_line(color = "grey"))+
-  theme(axis.text.x = element_text(angle = 90))+
-  theme(legend.position = "")
 
 
 
@@ -181,45 +195,6 @@ latest 18 month for this site.
 
 ```{r echo=FALSE, results='hide',fig.asp = 0.8,  fig.height=10,fig.width = 12,message=FALSE, warnings = FALSE}
 
-plotdata1 <- data_time_resource_runchart_site  %>%
-  filter (site_name == params$site_name)
-
-### SPC plots
-
-plot_obj <- ptd_spc(
-  plotdata1,
-  value_field = `median(Resource_Time)`,
-  date_field = arrival_week,
-    improvement_direction =  "decrease"
-)
-
-
-plot <- ptd_create_ggplot(
-  plot_obj,
-  icons_position = 'none',
-  x_axis_date_format = "%b-%y",
-  x_axis_breaks = "3 months",
-  percentage_y_axis = FALSE,
-  point_size = 4,
-  y_axis_label = '',
-  x_axis_label = NULL,
-  main_title    = "Median Resource time"
-)
-
-plot+ 
-  theme_minimal(base_size = 16)+
-  #theme(strip.text.x = element_text(size = 15, colour = "Black", face ="bold"))
-  theme(panel.grid.minor = element_blank())+
-  theme(panel.border=element_blank())+
-  theme(plot.title = element_text(size = 13,
-                                  face = "bold",
-                                  margin = margin(10,0,10,0),
-                                  family = "sans"))+
-  theme(axis.line = element_line(color = "grey"))+
-  theme(axis.text.x = element_text(angle = 90))+
-  theme(legend.position = "top")+
-  labs(caption="Source NHSE SUS Plus Live")
-
 
 ```
 
@@ -230,48 +205,6 @@ complaint time over the latest 18 month for this site.
 
 ```{r echo=FALSE, results='hide',fig.asp = 0.8, fig.height=10, fig.width = 12,message=FALSE, warnings = FALSE}
 
-plotdata2 <- sub_setdata_CC  %>%
-  filter (site_name == params$site_name)
-
-### SPC plots
-
-plot_obj <- ptd_spc(
-  plotdata2 ,
-  value_field = Total_Attendances_by_Group,
-  date_field = der_activity_month,
-  facet_field = chiefcomplaintgrouping,
-  improvement_direction =  "decrease"
-)
-
-
-
-plot <- ptd_create_ggplot(
-  plot_obj,
-  icons_position = 'none',
-  x_axis_date_format = "%b-%y",
-  x_axis_breaks = "3 months",
-  percentage_y_axis = FALSE,
-  point_size = 4,
-  y_axis_label = '',
-  x_axis_label = NULL,
-  main_title    = "Attendances by Chief Complaint Group"
-)
-
-
-
-plot+ 
-  theme_minimal(base_size = 16)+
-  #theme(strip.text.x = element_text(size = 15, colour = "Black", face ="bold"))
-  theme(panel.grid.minor = element_blank())+
-  theme(panel.border=element_blank())+
-  theme(plot.title = element_text(size = 13,
-                                  face = "bold",
-                                  margin = margin(10,0,10,0),
-                                  family = "sans"))+
-  theme(axis.line = element_line(color = "grey"))+
-  theme(axis.text.x = element_text(angle = 90))+
-  theme(legend.position = "top")+
-  labs(caption="Source: NHSE SUS Plus Live")
-
 
 ```
+

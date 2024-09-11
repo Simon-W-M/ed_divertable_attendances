@@ -13,17 +13,18 @@ presentaion_popular <- attend_pat |>
          .by = hospital_name) |>
   filter(rank <= 6)
 
-
 #  summary for benchmark
 
 latest_full_mth <- ceiling_date(max(attend_pat$mth) %m-% months(1), 
                                 "month") - days(1)
 six_mths_ago <- ceiling_date(latest_full_mth %m-% months(6), 
-                             "month") - days(1)
+                             "month") 
 twelve_mths_ago <- ceiling_date(latest_full_mth %m-% months(12), 
                                 "month") - days(1)
 eighteen_mths_ago <- ceiling_date(latest_full_mth %m-% months(18), 
-                                  "month") - days(1)
+                                  "month")
+
+num_days <- as.numeric(difftime(latest_full_mth,six_mths_ago,units='days'))
 
 latest_full_mth_pretty <- format(latest_full_mth, '%b %y')
 six_mths_ago_pretty <- format(six_mths_ago, '%b %y')
@@ -32,35 +33,32 @@ eighteen_mths_ago_pretty <- format(eighteen_mths_ago, '%b %y')
 
 # last 6 months for site
 
-site <- 'TORBAY HOSPITAL'
-site <- 'THE GREAT WESTERN HOSPITAL'
+#site <- 'TORBAY HOSPITAL'
+#site <- 'THE GREAT WESTERN HOSPITAL'
 
-chief_compl <- 'Trauma / musculoskeletal'
-
-
-
-
-
-sum_intro <- attend_pat |>
+sum_intro <- attend_pat_cln |>
   filter(hospital_name == site,
          #chiefcomplaintgrouping ==  chief_compl,
-         arrival_week > six_mths_ago) |>
+         arrival_date > six_mths_ago,
+         arrival_date <= latest_full_mth) |>
   mutate(aa_time = if_else(isAvoidable == T, Resource_Time, 0),
          non_aa_res_time = if_else(non_aa_resource == 1, Resource_Time, 0),
          admit_time = if_else(discharged == 0, Resource_Time, 0),
-         approp_time = Resource_Time - aa_time -non_aa_res_time -  admit_time) |>
+         approp_time = if_else(appropriate == 1, Resource_Time, 0)) |>
   summarise(tot = n(),
             avoid_attend = sum(isAvoidable, na.rm=T),
             non_aa_res = sum(non_aa_resource, na.rm=T),
             admits = sum(if_else(discharged== 0,1,0)),
-            approp = sum(tot - non_aa_res - admits - avoid_attend),
+            approp = sum(appropriate, na.rm=T),
             tot_t = sum(Resource_Time),
             avoid_attend_t = sum(aa_time, na.rm=T),
             non_aa_res_t = sum(non_aa_res_time, na.rm=T),
             admits_t = sum(admit_time, na.rm=T),
             approp_t = sum(approp_time, na.rm=T),
             .by = chiefcomplaintgrouping) |>
-  mutate(mean_t = non_aa_res_t / non_aa_res) |>
+  mutate(mean_t = non_aa_res_t / non_aa_res,
+         num_divert_day = non_aa_res /  num_days,
+         mean_t_day = non_aa_res_t / num_days) |>
   arrange(-non_aa_res) |>
   select(chiefcomplaintgrouping,
          avoid_attend,
@@ -73,10 +71,13 @@ sum_intro <- attend_pat |>
          approp_t,
          admits_t,
          tot_t,
-         mean_t)
+         mean_t,
+         num_divert_day,
+         mean_t_day)
 
 
-sum_intro |> gt() |>
+data_summary_table <-sum_intro |> 
+  gt() |>
   tab_header(
     title = paste0("Type 1 walk in attendances by chief complaint: ", 
                    six_mths_ago_pretty, 
@@ -85,15 +86,24 @@ sum_intro |> gt() |>
     subtitle = md("Split by Avoidable Attendances, Divertable Attendances, Appropriate Attendances and Admissions")
   ) |>
   tab_footnote(
-    footnote = md("*Data taken from ECDS*")
+    footnote = md("*Data taken from ECDS* : **NOTE** Numbers are rounded for clarity")
   ) |>
   fmt_number(
     columns = everything(),
     decimals = 0,
     sep_mark =','
+  ) |>  fmt_number(
+    columns = c(mean_t,num_divert_day ,mean_t_day ),
+    decimals = 1,
+    sep_mark =','
   ) |>
+  
   data_color(
-    columns = c("non_aa_res", "non_aa_res_t", "mean_t"),
+    columns = c("non_aa_res", 
+                "non_aa_res_t", 
+                "mean_t", 
+                "num_divert_day", 
+                "mean_t_day"),
     alpha = 0.5,
     palette = "#FFB81C"
   ) |>
@@ -111,6 +121,11 @@ sum_intro |> gt() |>
     admits_t,
     tot_t
   )) |>
+  tab_spanner(label = "Divertable attendances \n (Total time - wait time)", columns = c(
+    mean_t,
+    num_divert_day,
+    mean_t_day
+  )) |>
   cols_label(
     chiefcomplaintgrouping = "Chief Complaint",
     tot = "Total Attendances",
@@ -118,21 +133,33 @@ sum_intro |> gt() |>
     non_aa_res	 = "Divertable Attendances",
     approp = "Appropriate Attendances",
     admits = "Admissions",
-    tot_t = "Total Attendances",
-    avoid_attend_t = "Avoidable Attendances",
-    non_aa_res_t	 = "Divertable Attendances",
-    approp_t = "Appropriate Attendances",
-    admits_t = "Admissions",
-    mean_t = "Mean time per divertable attendance"
-  ) 
+    tot_t = "Total Attendances (Mins)",
+    avoid_attend_t = "Avoidable Attendances (Mins)",
+    non_aa_res_t	 = "Divertable Attendances (Mins)",
+    approp_t = "Appropriate Attendances (Mins)",
+    admits_t = "Admissions (Mins)",
+    mean_t = "Mean time per divertable attendance per day",
+    num_divert_day = "Mean number of divertable attendances per day",
+    mean_t_day = "Mean minutes divertable attendances per day"
+  ) |>
+  tab_options(table.font.size =  12) |>
+  tab_style(
+    style = cell_borders(
+      sides = c("right"),
+      color = "blue",
+      weight = px(1.5),
+      style = "solid"
+    ),
+    locations = cells_body(
+      columns = c(tot, tot_t)
+  ))
 
 
 
 ###
 
 
-library(DiagrammeR)
-DiagrammeR("
+flow <- DiagrammeR("
   graph LR
     Attendance(Attendance)-->Avoidable
     Attendance-->Divertable
@@ -151,13 +178,6 @@ style Notes_DI fill:#FFB81C;
 
 
 
-
-
-
-
-
-
-
 # create a filtered dataset to presentation type
 # add tags for 6,12 & 18 mths
 
@@ -166,6 +186,10 @@ style Notes_DI fill:#FFB81C;
 
 #unique(attend_pat$chiefcomplaintgrouping)
 
+# give a tag number to all to give total attendances
+#and count appropriate  attendances
+
+
 
 filter_presentation_tag_dates <- function(data, presentation) {
   dat_sum <- data |>
@@ -173,19 +197,18 @@ filter_presentation_tag_dates <- function(data, presentation) {
       chiefcomplaintgrouping == presentation,
       arrival_date <= latest_full_mth
     ) |>
-    mutate(mths_ago = case_when(mth > six_mths_ago ~ "a6_mths",
-      mth > twelve_mths_ago ~ "b12_mths",
-      mth > eighteen_mths_ago ~ "c18_mths",
+    mutate(mths_ago = case_when(
+      arrival_date > six_mths_ago ~ "a6_mths",
+      arrival_date > twelve_mths_ago ~ "b12_mths",
+      arrival_date > eighteen_mths_ago ~ "c18_mths",
       .default = "outside_18_mths"
     )) |>
     filter(mths_ago != "outside_18_mths")
   dat_sum
 }
 
-dat_sum <- filter_presentation_tag_dates(attend_pat, 'Trauma / musculoskeletal')
-
-
-
+#dat_sum <- filter_presentation_tag_dates(attend_pat_cln, 'Trauma / musculoskeletal')
+#unique(dat_sum$isAvoidable)
 
 
 
@@ -211,42 +234,26 @@ change_summary <- function(data, presentation, feature, var, hospital) {
     mutate(perc_change = (attends - lead(attends, 2)) / lead(attends, 2) * 100,
       .by = hospital_name) |>
     filter(!is.na(perc_change)) |>
-    mutate(col = if_else(hospital_name == hospital, 'blue', 'grey'))
+    mutate(col = if_else(hospital_name == hospital, 'blue', 'grey'),
+           perc_change = if_else(perc_change> 120, 120, perc_change))
   change_sum
 }
-
-# change_sum<- change_summary(attend_pat, 
-#                             'Trauma / musculoskeletal', 
-#                             'non_aa_resource', 
-#                             '1', 
-#                             'DERRIFORD HOSPITAL')
-
-# function to produce change summary
-change_summary <- function(data, presentation, feature, var, hospital) {
-  dat_sum <- filter_presentation_tag_dates(data, presentation)
-  
-  change_sum <- dat_sum |>
-    filter(!!sym(feature) == var) |>
-    summarise(
-      attends = n(),
-      .by = c(mths_ago, hospital_name)
-    ) |>
-    arrange(hospital_name, mths_ago) |>
-    mutate(perc_change = (attends - lead(attends, 2)) / lead(attends, 2) * 100,
-           .by = hospital_name) |>
-    filter(!is.na(perc_change)) |>
-    mutate(col = if_else(hospital_name == hospital, 'blue', 'grey'))
-  change_sum
-}
-
-
+# 
+# change_sum<- change_summary(attend_pat,
+#                             'Trauma / musculoskeletal',
+#                             'appropriate',
+#                             '1',
+#                             i)
 
 
 change_plot <- function(data, presentation, feature, var, hospital, title) {
 
-  change_summary (data, presentation, feature, var, hospital) |>
+  change_sum <- change_summary (data, presentation, feature, var, hospital)
+  
+  change_sum |>
     mutate(hospital_name = if_else(hospital_name == 'BRISTOL ROYAL HOSPITAL FOR CHILDREN', 'BRISTOL CHILDREN', hospital_name),
            hospital_name = str_remove(hospital_name, 'HOSPITAL'),
+           hospital_name = str_remove(hospital_name, 'THE'),
            hospital_name = if_else(str_count(hospital_name, pattern = ' ') > 1, word(hospital_name,1,2), hospital_name)) |>
   ggplot(aes(x = perc_change, 
            y = reorder(hospital_name, 
@@ -264,88 +271,83 @@ change_plot <- function(data, presentation, feature, var, hospital, title) {
     )
 
 }
-
 # 
-# a<- change_plot(attend_pat, 
-#             'General / minor / admin', 
-#             'isAvoidable', 
-#             'TRUE', 
-#             'POOLE HOSPITAL',
-#             'Change in avoidable attendances')  
-# 
-# b <- change_plot(attend_pat, 
-#             'General / minor / admin', 
-#             'non_aa_resource', 
-#             '1', 
-#             'POOLE HOSPITAL',
-#             'Change in divertable attendances') 
-# 
-# plot_grid(a, b,  nrow = 1)
-# 
-# library(cowplot)
-# 
-# 
-# 
+# change_plot(
+#  data,
+#  presentaion_popular_site$chiefcomplaintgrouping[1],
+#  feature, val,
+#  site,
+#  paste0(presentaion_popular_site$chiefcomplaintgrouping[1]))
 
 
-plot_change <- function(site) {
-presentaion_popular_site <- presentaion_popular |>
-  filter(hospital_name == site)
 
-a<- change_plot(attend_pat, 
-            presentaion_popular_site$chiefcomplaintgrouping[1], 
-            'non_aa_resource', 
-            '1', 
-            site,
-            paste0(
-                   presentaion_popular_site$chiefcomplaintgrouping[1])) 
+plot_change <- function(data, site, feature, val) {
+  presentaion_popular_site <- presentaion_popular |>
+    filter(hospital_name == site)
 
-b<- change_plot(attend_pat, 
-            presentaion_popular_site$chiefcomplaintgrouping[2], 
-            'non_aa_resource', 
-            '1', 
-            site,
-            paste0(
-                   presentaion_popular_site$chiefcomplaintgrouping[2])) 
+  a <- change_plot(
+    data,
+    presentaion_popular_site$chiefcomplaintgrouping[1],
+    feature, val,
+    site,
+    paste0(presentaion_popular_site$chiefcomplaintgrouping[1])
+  )
 
-c <- change_plot(attend_pat, 
-            presentaion_popular_site$chiefcomplaintgrouping[3], 
-            'non_aa_resource', 
-            '1', 
-            site,
-            paste0(
-                   presentaion_popular_site$chiefcomplaintgrouping[3])) 
+  b <- change_plot(
+    data,
+    presentaion_popular_site$chiefcomplaintgrouping[2],
+    feature, val,
+    site,
+    paste0(presentaion_popular_site$chiefcomplaintgrouping[2])
+  )
 
-d <- change_plot(attend_pat, 
-            presentaion_popular_site$chiefcomplaintgrouping[4], 
-            'non_aa_resource', 
-            '1', 
-            site,
-            paste0(
-                   presentaion_popular_site$chiefcomplaintgrouping[4])) 
+  c <- change_plot(
+    data,
+    presentaion_popular_site$chiefcomplaintgrouping[3],
+    feature, val,
+    site,
+    paste0(presentaion_popular_site$chiefcomplaintgrouping[3])
+  )
 
-e <- change_plot(attend_pat, 
-            presentaion_popular_site$chiefcomplaintgrouping[5], 
-            'non_aa_resource', 
-            '1', 
-            site,
-            paste0(
-                   presentaion_popular_site$chiefcomplaintgrouping[5])) 
+  d <- change_plot(
+    data,
+    presentaion_popular_site$chiefcomplaintgrouping[4],
+    feature, val,
+    site,
+    paste0(presentaion_popular_site$chiefcomplaintgrouping[4])
+  )
 
-f <- change_plot(attend_pat, 
-            presentaion_popular_site$chiefcomplaintgrouping[6], 
-            'non_aa_resource', 
-            '1', 
-            site,
-            paste0(presentaion_popular_site$chiefcomplaintgrouping[6])) 
+  e <- change_plot(
+    data,
+    presentaion_popular_site$chiefcomplaintgrouping[5],
+    feature, val,
+    site,
+    paste0(presentaion_popular_site$chiefcomplaintgrouping[5])
+  )
 
-plot_grid(a, b, c, d, e, f, label_y = 1, rel_heights = c(0.2,.20,.60), nrow = 2)
+  f <- change_plot(
+    data,
+    presentaion_popular_site$chiefcomplaintgrouping[6],
+    feature, val,
+    site,
+    paste0(presentaion_popular_site$chiefcomplaintgrouping[6])
+  )
 
+  plot_grid(a, b, c, d, e, f, label_y = 1, rel_heights = c(0.2, .20, .60), nrow = 2)
 }
 
+bench_da <- plot_change(attend_pat_cln, i, 'non_aa_resource', '1')
+bench_aa <- plot_change(attend_pat_cln, i, 'isAvoidable', 'TRUE')
+bench_ad <- plot_change(attend_pat_cln, i, 'discharged', '0')
+bench_to <- plot_change(attend_pat_cln, i, 'total', '1')
+bench_ap <- plot_change(attend_pat_cln, i, 'appropriate', '1')
 
-plot_change('POOLE HOSPITAL')
 
+'discharged', 
+'0', 
+
+'tot_attend', 
+'1',
 
 attend_pat$tot_attend <- 1
 

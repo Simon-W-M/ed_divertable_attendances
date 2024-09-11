@@ -322,5 +322,41 @@ attend_pat<- attend_pat %>%
                               .default = "outside_18_mths"
   )) 
 
+attend_pat <- attend_pat |>
+  mutate(appropriate = if_else(isAvoidable == F & discharged == 1 & non_aa_resource == 0 ,1,0 ),
+         total = 1,
+         isAvoidable = is.na(isAvoidable), FALSE, isAvoidable,
+         chiefcomplaintgrouping = if_else(is.na(chiefcomplaintgrouping), 'Not Specified', chiefcomplaintgrouping))
 
-
+attend_pat_cln <- attend_pat |>
+  select ( "chiefcomplaintgrouping",
+           "mth",
+           "Time_to_Treat",
+           "arrival_date",
+           "ec_acuity_snomed_ct",
+           "ec_chief_complaint_snomed_ct",
+           "site_name",
+           "hospital_name",
+           "Department_Type",
+           "Discharge_Status",
+           "AttendanceCategory",
+           "arrival_week",
+           "travel_time_car",
+           "age_at_arrival",
+           "index_of_multiple_deprivation_decile",
+           "arrival_time",
+           "sex",
+           "ethnic_category",
+           "discharge_destination_snomed_ct",
+           "acuity",
+           "travel_30",
+           "weekday",
+           "arrival_hr",
+           "arrival_ooo",
+           "arrival_time_consol",
+           "Resource_Time",
+           "discharged",
+           "isAvoidable",
+           "non_aa_resource",
+           "appropriate",
+           "total")      

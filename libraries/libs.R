@@ -41,7 +41,9 @@ packages <- c('lubridate',
               'NHSRplotthedots',
               'janitor',
               'CausalImpact',
-              'ESAAvoidableAtt'
+              'ESAAvoidableAtt',
+              'cowplot',
+              'DiagrammeR'
               
               
               #'stringi'
