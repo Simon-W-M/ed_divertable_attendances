@@ -1,0 +1,665 @@
+---
+title: "NHSE SW P&D Directorate Wellbeing Survey Results"
+toc: true
+toc-location: left
+format:
+  html:
+    number-sections: false
+    title-block-banner: true
+    title-block-banner-color: <#005EB8>
+    self-contained: true 
+---
+
+```{r}
+#| echo: false
+#| warning: false
+
+library(tidyverse)
+library(scales)
+library(tm)
+library(sentimentr)
+library(readxl)
+#remotes::install_github('jbryer/likert')
+library(likert)
+library(gt)
+library(gtExtras)
+library(cowplot)
+library(lares)
+
+date_of_survey <- as.Date('2023-09-06')
+
+
+data <- read_excel("C:/Users/simon.wellesley-mill/OneDrive - NHS/Documents/Copy of NHSE SW P&D Directorate _Wellbeing Survey 1 FINAL.xlsx")
+
+# tidy questions 
+data <- data |>
+  rename(`Overall I have felt happy at work over the last 3 months` = `Overall I have felt happy at work over the last 3 months..Answer`,
+         `I would feel confident to report concerns regarding bullying/harassment without worrying that it would have a negative impact on me` = `I would feel confident to report concerns regarding bullying/harassment without worrying that it would have a negative impact on me..Answer`,
+         `I feel that the teams within the SW region and our directorate are working well together.`= `Please consider the following statements regarding management:.I feel that the teams within the SW region and our directorate are working well together.`,
+         `I receive communications from directorate senior management that are relevant to me and my role.`  = `Please consider the following statements regarding management:.I receive communications from directorate senior management that are relevant to me and my role.`,
+         `I receive communications from my team & line manager that are relevant to me and my role.` = `Please consider the following statements regarding management:.I receive communications from my team & line manager that are relevant to me and my role.` ,
+          `In the last 6 months, I have agreed, reviewed or updated my objectives with my line manager.` = `Please consider the following statements regarding management:.In the last 6 months, I have agreed, reviewed or updated my objectives with my line manager.`,
+         `I can meet the requirements of my job without regularly working beyond my contracted hours.` = `Please consider the following statements regarding your working environment:.I can meet the requirements of my job without regularly working beyond my contracted hours.`,
+         `I have access to training/development opportunities which help me to do my current job effectively.` = `Please consider the following statements regarding your working environment:.I have access to training/development opportunities which help me to do my current job effectively.`,
+         `I am given the time for training and/or to take development opportunities.` = `Please consider the following statements regarding your working environment:.I am given the time for training and/or to take development opportunities.`,
+         `I am satisfied with my current working routine (e.g. in-person working, working hours, place of work)` = `Please consider the following statements regarding your working environment:.I am satisfied with my current working routine (e.g. in-person working, working hours, place of work)`,
+         `I get support from my line manager to avoid (or reduce) working beyond my contracted hours.` = `Please consider the following statements regarding your working environment:.I get support from my line manager to avoid (or reduce) working beyond my contracted hours.`)
+
+# no idea why I had to rename these columns this way but the above method
+# simply did not work
+# if questions change then need to be aware of this
+data <- data |>
+  rename(`I have an appropriate level of choice in deciding how I do my work.` = colnames(data)[18],
+         `I have an appropriate level of contact and support from my  line manager (including monthly dynamic conversations).` = colnames(data)[19],
+         `In the last 3 months, have you personally been a victim of bullying, harassment or abuse at work?` = colnames(data[9]),
+         `In the last 3 months, have you observed bullying, harassment or abuse at work?` = colnames(data[10]))
+         
+# convert the yes no to agree / disagree
+data <- data |>
+   mutate(`In the last 3 months, have you personally been a victim of bullying, harassment or abuse at work?` = if_else(`In the last 3 months, have you personally been a victim of bullying, harassment or abuse at work?` == 'Yes', 'Agree', 'Disagree'),
+          `In the last 3 months, have you observed bullying, harassment or abuse at work?` = if_else(`In the last 3 months, have you observed bullying, harassment or abuse at work?` == 'Yes', 'Strongly agree', 'Strongly disagree')) 
+
+planned_care <- c("Elective", "Cancer", "Diagnostics")
+admin_other <- c("Admin Hub", "Other/prefer not to say") 
+
+data <- data |>
+  mutate(`What team are you in?` = case_when(`What team are you in?` %in% planned_care ~ 'Planned Care',
+                                             `What team are you in?` %in% admin_other ~ 'Admin, Other & Not Stated',
+                                             .default = `What team are you in?` ))
+
+# set a couple of variables for later use
+teams <- sort(unique(data$`What team are you in?`)) # this is the list iterated through for the functions
+questions <- colnames(data) 
+
+####################### 
+# Participation table #
+#######################
+
+# this is where number in team is hardcoded
+data_sum <- data |>
+  rename(Team = `What team are you in?`) |>
+  count(Team) |>
+  mutate(team_num = case_when(Team == 'Planned Care' ~  14,
+                              Team == 'Insights & Intelligence' ~  30,
+                              Team == 'UEC' ~  5,
+                              Team == 'RPDU' ~  16,
+                              Team == 'Admin, Other & Not Stated' ~  10,
+                              Team == 'EPRR & ROC' ~  10,# needs checking
+                              .default = 99999
+                              ),
+         resp_rate = round(n / team_num,3),
+         resp_rate_c = resp_rate*100,
+         resp_rate_c = if_else(Team == 'Admin, Other & Not Stated', 0, resp_rate_c))
+
+# create GT table
+sum_tab <- data_sum |>
+  gt() |>
+  # merge columns and format to '(xx/xx)'
+  cols_merge(
+    columns = c(
+      n,
+      team_num
+    ),
+    pattern = "({1}/{2})"
+  ) |>
+  # convert to percentage
+  fmt_percent(
+    columns = c(
+      resp_rate
+    ),
+    decimals = 1
+  ) |>
+  # add mini bar
+  gt_plt_bar_pct(
+    column = resp_rate_c, scaled = TRUE,
+    fill = "#005EB8", 
+    background = "lightblue"
+  ) |>
+  # rename columns
+  cols_label(
+    n = "Numbers",
+    resp_rate = "%Response Rate",
+    resp_rate_c = "Chart"
+  ) |>
+  # add titles
+  tab_header(
+    title = paste0(
+      "South West Staff Wellbeing Survey: ",
+      format(date_of_survey, "%d %B %y")
+    ),
+    subtitle = md("Numbers of responses and response rates by team")
+  ) |>
+  tab_footnote(
+    footnote = md("*Data taken from Microsoft forms survey*")
+  )
+
+##############################
+# Calculate sentiment scores #
+##############################
+
+convert_senti_scores <- function(data, team, column) {
+#' @title Converts Sentiment Scores of Responses
+#'
+#' @description
+#' This function calculates sentiment scores for responses within a specified team and column. It first filters the data based on the team, then preprocesses the responses by removing stop words, punctuation, and extra spaces. The function then separates the responses into individual words and calculates sentiment scores using the `sentiment` function.
+#'
+#' @param data A data frame containing the responses.
+#' @param team The name of the team to analyze.
+#' @param column The name of the column containing the responses.
+#'
+#' @return A data frame with two columns: "answers" and "senti_score". The "answers" column contains the individual words from the responses, and the "senti_score" column contains the corresponding sentiment scores.
+#'
+#' @examples
+#' # Assuming 'data' is a data frame with columns 'team', 'response', and 'sentiment_score'
+#' converted_data <- convert_senti_scores(data, "Team A", "response")
+
+  words <- data |>
+    filter(`What team are you in?` == team) |>
+    select(answers = !!sym(column)) |>
+    mutate(
+      answers = removeWords(answers, stopwords("english")),
+      answers = removePunctuation(answers,
+        preserve_intra_word_contractions = FALSE,
+        preserve_intra_word_dashes = FALSE
+      ),
+      # answers = stemDocument(answers, language = "english"),
+      answers = str_squish(answers)
+    ) |>
+    separate_longer_delim(answers,
+      delim = " "
+    ) |>
+    mutate(
+      senti_score = sentiment(answers),
+      senti_score = senti_score$sentiment
+    )
+}
+
+most_common_pos_neg <- function(data, team, column) {
+#' @title Identifies Most Common Positive and Negative Responses
+#'
+#' @description
+#' This function analyzes a dataset to identify the most frequently occurring positive and negative responses within a specified team and column. It first converts sentiment scores, then performs stemming and tokenization on the responses. Finally, it groups the responses by their sentiment and counts their occurrences to determine the most common ones.
+#'
+#' @param data A data frame containing the responses.
+#' @param team The name of the team to analyze.
+#' @param column The name of the column containing the responses.
+#'
+#' @return A data frame with two columns: "pos" and "neg". The "pos" column contains the 3 most common positive responses, while the "neg" column contains the 3 most common negative responses.
+#'
+#' @examples
+#' # Assuming 'data' is a data frame with columns 'team', 'sentiment_score', and 'response'
+#' most_common_pos_neg(data, "Team A", "response")
+
+  most_common_pos_neg <- convert_senti_scores(data, team, column) |>
+    mutate(
+      answers = stemDocument(answers, language = "english"),
+      answers = tolower(answers),
+      sent = case_when(senti_score > 0 ~ "poss",
+        senti_score < 0 ~ "neg",
+        .default = "neu"
+      )
+    ) |>
+    summarise(
+      count = n(),
+      .by = answers, sent
+    ) |>
+    unique()
+
+  most_com_neg <- most_common_pos_neg |>
+    filter(sent == "neg") |>
+    arrange(-count) |>
+    head(3) |>
+    select(answers)
+
+  most_com_pos <- most_common_pos_neg |>
+    filter(sent == "poss") |>
+    arrange(-count) |>
+    head(3) |>
+    select(answers)
+
+  pos <- most_com_pos$answers
+  neg <- most_com_neg$answers
+
+  # this bit ensures both lists are same length so they can be bound together
+  max_length <- max(length(pos), length(neg))
+
+  length(pos) <- max_length
+  length(neg) <- max_length
+
+  comm <- cbind(pos, neg)
+
+  comm <- data.frame(comm)
+
+  comm
+}
+
+plot_answer <- function(data, team, column) {
+#' @title Plots Sentiment Scores of Responses
+#'
+#' @description
+#' This function creates a boxplot and jitter plot to visualize the distribution of sentiment scores for responses within a specified team and column. The plot uses a red-green color gradient to represent sentiment polarity, with negative scores in red and positive scores in green.
+#'
+#' @param data A data frame containing the responses.
+#' @param team The name of the team to analyze.
+#' @param column The name of the column containing the responses.
+#'
+#' @return A ggplot object representing the sentiment score plot.
+#'
+#' @examples
+#' # Assuming 'data' is a data frame with columns 'team', 'response', and 'sentiment_score'
+#' plot_answer(data, "Team A", "response")
+  
+  words <- convert_senti_scores(data, team, column)
+
+  plt <- ggplot(words, aes(x = 1, y = senti_score, colour = senti_score)) +
+    scale_colour_gradient(low = "red", high = "green") +
+    geom_jitter(width = 0.05, height = 0.2, size = 2) +
+    geom_boxplot(alpha = 0.5, width = 0.4, fill = "lightgrey") +
+    stat_summary(fun = median, geom = "text", aes(label = round(..y.., 2)), vjust = -3) +
+    scale_x_discrete(labels = label_wrap(width = 10)) +
+    ylim(-1.2, 1.2) +
+    coord_flip() +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    labs(y = "Negative                                                                          Positive", x = "") +
+    ggtitle(column) +
+    geom_hline(
+      yintercept = 0,
+      linetype = 3,
+      colour = "blue"
+    ) +
+    theme(axis.text = element_text(size = 14, face = "bold"))
+
+  suppressWarnings(print(plt))
+}
+
+################
+# likert plots #
+################
+
+likert_plot <- function(data, team,
+                        question_1, question_2,
+                        question_3, question_4,
+                        question_5, question_6,
+                        bully = 0) {
+#' @title Creates a Likert Scale Plot for Survey Responses
+
+#' @description
+#' This function generates a Likert scale plot to visualize responses to multiple survey questions within a specified team. It filters data for the chosen team, selects the relevant question columns, and converts them to factor variables with predefined Likert scale options. The function then uses the `likert` package to create the plot. Additionally, it calculates the total number of responses for each question and displays them alongside the plot.
+
+#' @param data A data frame containing the survey responses.
+#' @param team The name of the team to analyze.
+#' @param question_1 to question_6: Names of the columns containing the Likert scale responses (up to 6 questions).
+#' @param bully: An optional boolean parameter (default: 0). If set to 1, swaps the color scheme for highlighting potential bullying-related questions (red for positive answers, blue for negative).
+#'
+#' @return A Likert scale plot representing the distribution of responses for each question.
+
+#' @examples
+#' # Assuming 'data' is a data frame with columns 'team', 'question_1', ..., 'question_6'
+#' likert_plot(data, "Team A", question_1 = "Question 1", question_2 = "Question 2", ...)
+#'
+#' # To highlight potential bullying:
+#' likert_plot(data, "Team A", question_1 = "Question 1", ..., bully = 1)
+  
+  like <- data |>
+    filter(`What team are you in?` == team) |>
+    select(
+      !!sym(question_1),
+      !!sym(question_2),
+      !!sym(question_3),
+      !!sym(question_4),
+      !!sym(question_5),
+      !!sym(question_6)
+    ) |>
+    mutate_all(
+      (~ factor(.,
+        levels = c(
+          "Strongly disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly agree"
+        )
+      ))
+    )
+
+  like <- as.data.frame(like)
+
+  tots <- data |>
+    filter(`What team are you in?` == team) |>
+    select(
+      !!sym(question_1),
+      !!sym(question_2),
+      !!sym(question_3),
+      !!sym(question_4),
+      !!sym(question_5),
+      !!sym(question_6)
+    ) |>
+    summarise(across(
+      everything(),
+      ~ sum(!is.na(.))
+    )) |>
+    pivot_longer(cols = everything()) |>
+    mutate(question = paste0(name, " : (n=", value, ")"))
+
+  like_dat <- likert(like)  
+  
+  like_dat$Item <- factor(like_dat$Item, levels = tots$question)
+
+  order <- as.vector(tots$name)
+
+  plot(like_dat,
+    low.color = if_else(bully == 0, "#FF6665", "#5AB4AC"),
+    high.color = if_else(bully == 0, "#5AB4AC", "#FF6665"),
+    neutral.color.ramp = "white",
+    neutral.color = "grey90",
+    ordered = TRUE,
+    group.order = order,
+    legend = "Response"
+  ) +
+    ggtitle("") +
+    theme_classic(base_size = 12) +
+    theme(
+      legend.position = "bottom",
+      axis.text = element_text(size = 14, face = "bold")
+    )
+}
+
+####################
+# Environment plot #
+####################
+env_plot <- function(data, team, question) {
+#' @title Creates a Bar Chart for Environment Responses
+
+#' @description
+#' This function analyzes a dataset to create a bar chart visualizing the distribution of responses to a specific environment-related question within a selected team. It filters data based on the team and question, separates semicolon-delimited responses, and focuses on "Team" and "Directorate" values. The function then calculates response counts and uses `ggplot2` to generate a bar chart with counts displayed as labels.  Finally if there are no responses it returns a blank chart with a message 'NO DATA TO DSIPLAY'
+
+#' @param data A data frame containing the responses.
+#' @param team The name of the team to analyze.
+#' @param question The name of the column containing the environment-related question.
+#'
+#' @return A ggplot object representing the bar chart or a message indicating no data available.
+
+#' @examples
+#' # Assuming 'data' is a data frame with columns 'team', 'question' (environment-related)
+#' env_plot(data, "Team A", "Which environment do you work in most often?") 
+ 
+  env <- data |>
+    filter(`What team are you in?` == team) |>
+    select(!!sym(question)) |>
+    separate_longer_delim(
+      cols = !!sym(question),
+      delim = ";"
+    ) |>
+    pivot_longer(cols = !!sym(question)) |>
+    mutate(value = str_remove(value, " ")) |>
+    filter(value %in% c("Team", "Directorate")) |>
+    summarise(
+      count = sum(!is.na(value)),
+      .by = c(value, name)
+    )
+
+  if (nrow(env) > 0) {
+    env |>
+      ggplot(aes(x = count, y = value, fill = count)) +
+      geom_col(width = 0.2) +
+      geom_text(aes(label = count),
+        nudge_x = 0.1,
+        size = 10
+      ) +
+      theme_minimal() +
+      labs(x = "", y = "", title = question) +
+      theme(
+        legend.position = "none",
+        axis.text.x = element_blank()
+      )
+  } else {
+    ggplot(env, aes(x=0,y=1)) + 
+      geom_text(label = paste0(question, ': NO DATA TO DISPLAY')) + theme_void()
+  }
+}
+
+```
+
+
+::: {.column-page-inset}
+
+We are committed to understanding and enhancing the overall wellbeing of our region. This survey is designed to help us identify where we can improve our support and create initiatives that promote a healthier and happier environment for everyone. All responses are anonymous.
+
+This is the analysis of the results of the September 2024 Survey.
+
+### Participation
+
+Participation by team is as follows.
+
+```{r}
+#| echo: false
+#| warning: false
+#| fig-width: 15
+
+sum_tab |> tab_options(table.width = pct(100))
+```
+
+## Happiness and morale at work
+
+::: panel-tabset
+```{r}
+#| output: asis
+res <- purrr::map_chr(teams, \(hw) {
+                           knitr::knit_child(text = c(
+                             "### `r hw`",
+                             "", 
+                             "```{r}",
+                             "#| echo: false",
+                             "#| warning: false",
+                             "#| fig-width: 15",
+                             "#| fig-height: 3",
+                             " likert_plot(data, hw, 
+                             'Overall I have felt happy at work over the last 3 months',
+                             '',
+                             '',
+                             '',
+                             '',
+                             '')",
+                             "plot_answer(data, hw, 
+                             'What 3 individual words would you use to describe your morale at work over the last 3 months?')",
+                             "#plot_grid(a, b, ncol = 1)",
+                             "\n",
+                             "\n",
+                             "words <- most_common_pos_neg (data, hw, 'What 3 individual words would you use to describe your morale at work over the last 3 months?') ",
+                             "```",
+                             "\n",
+                             "The most common positive words are `r toString(words$pos)`",
+                             "\n",
+                             "The most common negative words are `r toString(words$neg)`",
+                             "\n",
+
+                             "\n",
+                             "",
+                             ""
+                           ), envir = environment(), quiet = TRUE)
+                         })
+
+ cat(res, sep = '\n')
+```
+:::
+
+::: {.callout-warning collapse="true"}
+## Information (Click to expand)
+
+The three words were fed into a lexicon that scores words from positive to negative.  The scores are plotted and a median calculated.  The boxplot shows the quartiles, the grey box shows where 50% of the sentiment lies.
+
+Words have been *stemmed* in order to group them to similar words - E.G. *'enjoying'* and *'enjoyed'* will be stemmed to *'enjoy'*
+
+:::
+
+
+
+## Bullying and Harrisment
+
+::: panel-tabset
+```{r}
+#| output: asis
+
+res <- purrr::map_chr(teams, \(hw) {
+                           knitr::knit_child(text = c(
+                             "### `r hw`",
+                             "", 
+                             "```{r}",
+                             "#| echo: false",
+                             "#| warning: false",
+                             "#| fig-height: 16",
+                             "#| fig-width: 15",
+                             "a <-likert_plot(data, hw, 
+                             'In the last 3 months, have you personally been a victim of bullying, harassment or abuse at work?',
+                             'In the last 3 months, have you observed bullying, harassment or abuse at work?',
+                             '',
+                             '',
+                             '',
+                             '',
+                             1)",
+                             "b <- env_plot(data, hw, 
+                             'In which environment did you experience bullying and/or harassment?')",
+                             "c <- env_plot(data, hw, 
+                             'In which environment did you observe bullying and/or harassment?')",
+                             "d <-likert_plot(data, hw, 
+                             'I understand how to raise concerns regarding bullying/harassment.',
+                             'I would feel confident to report concerns regarding bullying/harassment without worrying that it would have a negative impact on me',
+                             '',
+                             '',
+                             '',
+                             '')",
+                             "plot_grid(a, b, c, d, ncol = 1)",
+                             "```",
+                             "\n",
+                             "",
+                             ""
+                           ), envir = environment(), quiet = TRUE)
+                         })
+
+ cat(res, sep = '\n')
+```
+:::
+
+::: {.callout-warning collapse="true"}
+## Information (Click to expand)
+
+Note that the bullying questions were yes/no.  These have been converted to strongly agree/strongly disagree to maintain consistency with the rest of the report.
+
+The colour codes have been swapped for these questions.  Strongly agree being red and disagree being green.
+
+For the environment question, it is possible to select more than one answer.
+
+:::
+
+## Management
+
+::: panel-tabset
+```{r}
+#| output: asis
+
+res <- purrr::map_chr(teams, \(hw) {
+                           knitr::knit_child(text = c(
+                             "### `r hw`",
+                             "", 
+                             "```{r}",
+                             "#| echo: false",
+                             "#| warning: false",
+                             "#| fig-height: 8",
+                             "#| fig-width: 15",
+                             "likert_plot(data, hw, 
+                             'I feel that the teams within the SW region and our directorate are working well together.',
+                             'I receive communications from directorate senior management that are relevant to me and my role.',
+                             'I have an appropriate level of choice in deciding how I do my work.',
+                             'I have an appropriate level of contact and support from my  line manager (including monthly dynamic conversations).',
+                             'In the last 6 months, I have agreed, reviewed or updated my objectives with my line manager.',
+                             '')",
+                             "```",
+                             "\n",
+                             "",
+                             ""
+                           ), envir = environment(), quiet = TRUE)
+                         })
+
+ cat(res, sep = '\n')
+```
+:::
+
+
+## Environment, personal development and flexibility
+
+::: panel-tabset
+```{r}
+#| output: asis
+
+res <- purrr::map_chr(teams, \(hw) {
+                           knitr::knit_child(text = c(
+                             "### `r hw`",
+                             "", 
+                             "```{r}",
+                             "#| echo: false",
+                             "#| warning: false",
+                             "#| fig-height: 8",
+                             "#| fig-width: 15",
+                             "likert_plot(data, hw, 
+                             'I can meet the requirements of my job without regularly working beyond my contracted hours.',
+                             'I get support from my line manager to avoid (or reduce) working beyond my contracted hours.',
+                             'I have access to training/development opportunities which help me to do my current job effectively.',
+                             'I am given the time for training and/or to take development opportunities.',
+                             'I am satisfied with my current working routine (e.g. in-person working, working hours, place of work)',
+                             '')",
+                             "```",
+                             "\n",
+                             "",
+                             ""
+                           ), envir = environment(), quiet = TRUE)
+                         })
+
+ cat(res, sep = '\n')
+```
+:::
+
+## STILL NEED TO DO 3 WORDS SATISFACTION AND REASONS
+- will use same basic for the satisfaction ratings
+- need to consider what to do with reasons- world clouds?  
+
+## NEED TO SORT THE WHERE QUESTIONS FOR BULLYING
+
+- Maybe tidy up the none reported?
+- Maybe change enviroement charts so they have same scale across both?
+- Need to make label axis text bigger in line with other text in other graphs
+
+## NEED TO ADD HEADING AND NHS LOGO
+
+## NOT SURE IF ANY BETTER INTRODUCTORY BLURB NEEDS TO BE ADDED
+
+## AM THINKING FOR FUTURE ITERATIONS, COULD ADD NESTED TABS OF PREVIOUS RESULTS TO SEE COMPARISON?
+
+## NEED TO UPDATE NUMBERS IN TEAMS
+
+## MAYBE ADD THE (N=X) TO END OF QUESTIONS TO SHOW NUMBER OF RESPONSES
+
+## COUPLE OF DATES ARE HARDCODED AT START AND END
+
+## CHECK FOR TYPOS
+
+## PING TO SUZIE FOR FEEDBACK
+
+## DOUBLE CHECK TYPOS
+
+Blah blah blah
+
+
+
+::: {.callout-note}
+Survey questions designed by Holly Marshall, Suzie Clegg and Simon Wellesley-Miller  
+Survey analysis and report developed by Suzie Clegg and Simon Wellesley-Miller  
+
+>  [**SW Insights and Intelligence Team**](mailto:england.swinsightsandintelligence@nhs.net)\
+>  *Version 0.9*  
+>  *September 2024*  
+
+:::
+
+:::
+

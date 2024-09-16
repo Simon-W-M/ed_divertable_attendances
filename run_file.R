@@ -36,13 +36,15 @@ site_list <- c(#"ROYAL DEVON & EXETER HOSPITAL (WONFORD)",
                #"ROYAL BOURNEMOUTH HOSPITAL",
                #"ROYAL UNITED HOSPITAL",
                #"YEOVIL DISTRICT HOSPITAL",
-               #"BRISTOL ROYAL INFIRMARY",
+               "BRISTOL ROYAL INFIRMARY")
                #"DERRIFORD HOSPITAL",
                #"THE GREAT WESTERN HOSPITAL",
                #"BRISTOL ROYAL HOSPITAL FOR CHILDREN",
                #"SOUTHMEAD HOSPITAL",
-               "MUSGROVE PARK HOSPITAL")
+               #"MUSGROVE PARK HOSPITAL")
 
+
+options(dplyr.summarise.inform = FALSE)
 
 for (i in site_list) {
   print(paste("Generating report for site :", i))
@@ -50,10 +52,14 @@ for (i in site_list) {
 
 }
 
-source('change_plots.R')
+site_name <- i
 
 
+source(paste0(path_data_wrang,'change_plots.R'))
 
+source(paste0(path_data_wrang,'cluster.R'))
+
+source(paste0(path_data_wrang,'spc_charts.R'))
 
 rmarkdown::render(paste0(path_output,"fin_report.Rmd"),
                   output_file = paste0("ed_attendance_", i,'_', format(latest_full_mth, '%y%m'), '.html'),

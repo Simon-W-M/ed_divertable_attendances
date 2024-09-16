@@ -43,7 +43,9 @@ packages <- c('lubridate',
               'CausalImpact',
               'ESAAvoidableAtt',
               'cowplot',
-              'DiagrammeR'
+              'DiagrammeR',
+              'gtExtras',
+              'glue'
               
               
               #'stringi'
