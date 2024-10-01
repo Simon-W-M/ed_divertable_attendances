@@ -66,7 +66,7 @@ overall_sum <- filtered_data |>
   mutate(trav_count = 1) |>
   pivot_wider(names_from = c(travel_30), 
               values_from = trav_count,
-              names_prefix = "trav_count_") |>
+              names_prefix = "trav_count_") 
   #mutate(imd_count = 1) |>
   # pivot_wider(names_from = c(imd_quint), 
   #             values_from = imd_count,
@@ -75,7 +75,17 @@ overall_sum <- filtered_data |>
   # pivot_wider(names_from = c(sex), 
   #             values_from = sex_count,
   #             names_prefix = "sex_count_") |>
-  select(-c(pat_id, non_aa_resource_0, non_aa_resource_1, non_aa_resource_NA)) |>
+
+  if (!"non_aa_resource_NA" %in% colnames(overall_sum)) {overall_sum$non_aa_resource_NA <- NA}
+  if (!"age_group_19-45" %in% colnames(overall_sum)) {overall_sum$`19-45` <- NA}
+  if (!"age_group_45-65" %in% colnames(overall_sum)) {overall_sum$`45-65` <- NA}
+  if (!"age_group_66-85" %in% colnames(overall_sum)) {overall_sum$`66-85` <- NA}
+  if (!"age_group_86 +" %in% colnames(overall_sum)) {overall_sum$`86 +` <- NA}
+
+
+  overall_sum <- overall_sum |>
+    select(-c(pat_id, non_aa_resource_0, non_aa_resource_1, non_aa_resource_NA)) |>
+
   summarise(across(everything(),
                    ~sum(., na.rm= T))) |>
   mutate(tot = ooo + open + wkend) |>
@@ -98,7 +108,15 @@ divert_sum <- filtered_data |>
   mutate(trav_count = 1) |>
   pivot_wider(names_from = c(travel_30), 
               values_from = trav_count,
-              names_prefix = "trav_count_") |>
+              names_prefix = "trav_count_")
+
+if (!"ooo" %in% colnames(divert_sum)) {divert_sum$ooo <- NA}
+if (!"wkend" %in% colnames(divert_sum)) {divert_sum$wkend <- NA}
+if (!"age_group_19-45" %in% colnames(divert_sum)) {divert_sum$`age_group_19-45` <- NA}
+if (!"age_group_45-65" %in% colnames(divert_sum)) {divert_sum$`age_group_45-65` <- NA}
+if (!"age_group_66-85" %in% colnames(divert_sum)) {divert_sum$`age_group_66-85` <- NA}
+if (!"age_group_86 +" %in% colnames(divert_sum)) {divert_sum$`age_group_86 +` <- NA}
+
   #mutate(imd_count = 1) |>
   # pivot_wider(names_from = c(imd_quint), 
   #             values_from = imd_count,
@@ -107,6 +125,7 @@ divert_sum <- filtered_data |>
   # pivot_wider(names_from = c(sex), 
   #             values_from = sex_count,
   #             names_prefix = "sex_count_") |>
+  divert_sum <- divert_sum |>
   select(-c(pat_id,non_aa_resource_1)) |>
   summarise(across(everything(),
                    ~sum(., na.rm= T))) |>
@@ -116,6 +135,8 @@ divert_sum <- filtered_data |>
                  .names ="perc_{.col}")) |>
   select(-perc_tot)
 
+  divert_sum[is.na(divert_sum)] <- 0
+  
 
 #################
 #clustering bit #
@@ -167,6 +188,15 @@ res_sum <- data |>
   arrange(-tot) |>
   ungroup() |>
   select(-V2)
+
+if (!"age_group_19-45" %in% colnames(res_sum)) {res_sum$`age_group_19-45` <- NA}
+if (!"age_group_45-65" %in% colnames(res_sum)) {res_sum$`age_group_45-65` <- NA}
+if (!"age_group_66-85" %in% colnames(res_sum)) {res_sum$`age_group_66-85` <- NA}
+if (!"age_group_86 +" %in% colnames(res_sum)) {res_sum$`age_group_86 +` <- NA}
+if (!"perc_age_group_19-45" %in% colnames(res_sum)) {res_sum$`perc_age_group_19-45` <- NA}
+if (!"perc_age_group_45-65" %in% colnames(res_sum)) {res_sum$`perc_age_group_45-65` <- NA}
+if (!"perc_age_group_66-85" %in% colnames(res_sum)) {res_sum$`perc_age_group_66-85` <- NA}
+if (!"perc_age_group_86 +" %in% colnames(res_sum)) {res_sum$`perc_age_group_86 +` <- NA}
 
 res_sum <- res_sum |>
   rename(tot = 'tot',
@@ -252,6 +282,8 @@ groups_com <- c('Total across all attendance types for comparison',
 groups_com <- data.frame(groups_com)
 
 gran_tab <- bind_cols(groups_com, gran_tab)
+
+gran_tab[is.na(gran_tab)] <- 0
 
 gran_tab
 }
@@ -508,7 +540,7 @@ comm <- comm |>
                            name == 'wkend' ~ 'arrive at the weekend',
                            .default = 'error'))
 
-comment_one <- glue('The largest cluster of this cohort is made of **{comment$tot[1]}** patients who strongest feature is that they **{comm$comment[1]}** and that they **{comm$comment[2]}** and **{comm$comment[3]}**. ')
+comment_one <- glue('The largest cluster of this cohort is made of **{comment$tot[1]}** patients whose strongest feature is that they **{comm$comment[1]}** and that they **{comm$comment[2]}** and **{comm$comment[3]}**. ')
 
 comment <- comment |>
   tail(3)
@@ -537,7 +569,7 @@ comm <- comm |>
                               name == 'wkend' ~ 'arrive at the weekend',
                               .default = 'error'))
 
-comment_two <- glue('The second largest cluster of this cohort is made of **{comment$tot[2]}** patients who strongest feature is that they **{comm$comment[1]}** and that they **{comm$comment[2]}** and **{comm$comment[3]}**. ')
+comment_two <- glue('The second largest cluster of this cohort is made of **{comment$tot[2]}** patients whose strongest feature is that they **{comm$comment[1]}** and that they **{comm$comment[2]}** and **{comm$comment[3]}**. ')
 
 comment <- comment |>
   tail(3)
@@ -566,7 +598,7 @@ comm <- comm |>
                               name == 'wkend' ~ 'arrive at the weekend',
                               .default = 'error'))
 
-comment_three <- glue('The final cluster of this cohort is made of **{comment$tot[3]}** patients who strongest feature is that they **{comm$comment[1]}** and that they **{comm$comment[2]}** and **{comm$comment[3]}**. ')
+comment_three <- glue('The final cluster of this cohort is made of **{comment$tot[3]}** patients whose strongest feature is that they **{comm$comment[1]}** and that they **{comm$comment[2]}** and **{comm$comment[3]}**. ')
 
 comb_com <- c(comment_one, comment_two, comment_three)
 

@@ -32,11 +32,11 @@ site_name <- params$site_name
 
 ## Abstract
 
-This report identifies changes in presentations over time for this site for emergency department attendances who were not conveyed by ambulance. Patients were categorised into one of four different cohorts of patients; the report focuses primarily on the cohort who could potentially be diverted from emergency department care if alternative services are available. 
+This report identifies changes in presentations over time at this site for emergency department attendances who were not conveyed by ambulance. Patients were categorised into one of four cohorts; the report focuses primarily on the cohort who could potentially be diverted from emergency department care if alternative services were available. 
 
 The patients are split into those categorised as **avoidable attendances**, **divertible attendances**, **appropriate attendances** and **admissions**. 
 
-The report benchmarks the last 6 months to the same previous 6 months a year ago (so that we do not compare summer to winter), and explores the increases or decreases by presentation for each of the above categories.
+The report benchmarks the last 6 months to the same  6 months a year ago (so that we do not compare summer to winter), and explores the increases or decreases by presentation for each of the above categories.
 
 A further breakdown and cluster analysis focuses on the **divertible attendances** to see if there is any insight within the demographic, temporal and geographic characteristics of those patients that may support developing alternative pathways or identification of these patients.
 
@@ -62,13 +62,40 @@ flow
 
 In addition to pure numbers of attendances we used a proxy for a measure of active or resource utilisation time for these patients.  So all time calculations take their total time in ward minus their wait time.  The study appreciates that this may not be completely active time with a clinician, but tries to account for the time they utilise that is not wait time.
 
-Geo spacial analysis utilsed a travel time to ward based on the patients home LSOA and utilised the average day car journey time.  The cohort was split to within 30 minutes travel time and over 30 minutes.  
+Geo spacial analysis utilsed a travel time to department based on the patients home LSOA and utilised the average day car journey time.  The cohort was split to within 30 minutes travel time and over 30 minutes.  
+
+## Comparison to pre covid levels
+
+There are two parts to this and the graphs demonstrate the difference.  The first is simply the count by number of attendances.  This metric shows that broadly this metric of activity is in line with pre covid levels.
+
+What is more diverse is the change of 'time in department'.  For this metric we took the total time in department minus the waiting time.  This was served as a proxy metric for time utilsing department resource.  The majority of sites have seen a sharper increase in this metric, which may be part of the reason that departments are reporting as busier.  This additional time may also correlate with more complex patient presentations, however this analysis does not explore that hypothesis.
+
+We can also observe that this change is different across different presentation types.
+
+## Comparison of increase of number of attendances and time (total - wait) {.tabset .tabset-fade .tabset-pills}
+
+### Total type 1 walk in
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, 'Total', 'attends'),
+             change_plot_ts(attend_pat_cln, 'Total', 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[1]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[1], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[1], 'resource_time'),
+             ncol = 2)
+```
+
 
 ## Benchmarking change over time {.tabset .tabset-fade .tabset-pills}
 
-These charts look at the last 6 months of attendances and compare them to the same 6 months a year ago.  The percentage change is then calculated.  This is broken down across the various attendance types we have identified.  Each chart shows one of the top 6 chief complain presentation types.
+These charts look at the last 6 months of attendances and compare them to the same 6 months pre covid.  The percentage change is then calculated.  This is broken down across the various attendance types we have identified.  Each chart shows one of the top 6 chief complain presentation types.
 
 We are most interested in this study for the change in divertible attendances.The other types are provided for context.  Further in the report we can see this in a more traditional time series for this individual site.
+
+This broadly matches the previous charts, except the previous charts are accumulated the 6 month average whilst these charts are based on the aggregate for the 6 months. 
 
 ### Total Attendances
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}

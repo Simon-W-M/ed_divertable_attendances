@@ -26,20 +26,20 @@ source(paste0(path_data_wrang,'data_wrang_update travel.R'))
 site_list <- c(#"ROYAL DEVON & EXETER HOSPITAL (WONFORD)",
                #"WESTON GENERAL HOSPITAL",
                #"CHELTENHAM GENERAL HOSPITAL",
-               #"ROYAL CORNWALL HOSPITAL (TRELISKE)",
+              # "ROYAL CORNWALL HOSPITAL (TRELISKE)",
                #"TORBAY HOSPITAL",
-               #"NORTH DEVON DISTRICT HOSPITAL",
-               #"GLOUCESTERSHIRE ROYAL HOSPITAL",
-               #"DORSET COUNTY HOSPITAL",
-               #"POOLE HOSPITAL",
-               #"SALISBURY DISTRICT HOSPITAL",
-               #"ROYAL BOURNEMOUTH HOSPITAL",
+              # "NORTH DEVON DISTRICT HOSPITAL",
+              # "GLOUCESTERSHIRE ROYAL HOSPITAL",
+              # "DORSET COUNTY HOSPITAL",
+               #"POOLE HOSPITAL",##
+              # "SALISBURY DISTRICT HOSPITAL",
+              # "ROYAL BOURNEMOUTH HOSPITAL",
                #"ROYAL UNITED HOSPITAL",
                #"YEOVIL DISTRICT HOSPITAL",
-               "BRISTOL ROYAL INFIRMARY")
-               #"DERRIFORD HOSPITAL",
-               #"THE GREAT WESTERN HOSPITAL",
-               #"BRISTOL ROYAL HOSPITAL FOR CHILDREN",
+              # "BRISTOL ROYAL INFIRMARY",
+               "DERRIFORD HOSPITAL")
+              # "THE GREAT WESTERN HOSPITAL")
+               #"BRISTOL ROYAL HOSPITAL FOR CHILDREN")
                #"SOUTHMEAD HOSPITAL",
                #"MUSGROVE PARK HOSPITAL")
 
@@ -49,8 +49,6 @@ options(dplyr.summarise.inform = FALSE)
 for (i in site_list) {
   print(paste("Generating report for site :", i))
   params <- list(site_name = i)
-
-}
 
 site_name <- i
 
@@ -67,7 +65,7 @@ rmarkdown::render(paste0(path_output,"fin_report.Rmd"),
                   params = params,
                   envir = new.env())
 
-
+}
 
 
 

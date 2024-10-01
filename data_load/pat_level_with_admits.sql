@@ -47,7 +47,7 @@ left Join [AGEM_TravelTime].[LSOA_to_Site] as trav
 on core.Site_Code_of_Treatment = trav.destination_name and 
 core.der_postcode_LSOA_code =  trav.origin_name
 
-where Arrival_Date  >=  DATEADD(month, -19, GETDATE())                                    -->= CONVERT(DATETIME, '2018-08-01 00:00:00', 102)) 
+where Arrival_Date  >= CONVERT(DATETIME, '2018-01-01 00:00:00', 102) 
 
 
 

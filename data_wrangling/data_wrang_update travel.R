@@ -25,8 +25,6 @@ attend_pat_raw_ad <- DBI::dbGetQuery(con,
 #)
 
 
-
-
 #saveRDS(attend_pat_raw.rds, 'attend_pat_raw.rds')
 #attend_pat_raw <- readRDS('attend_pat_raw.rds')
 
@@ -251,10 +249,11 @@ attend_pat <- attend_pat %>% rename(Time_to_Treat= ec_seen_for_treatment_time_si
 
 
 # Calculate the 95th percentile TTT
-percentile_95_TTT <- quantile(attend_pat $Time_to_Treat, 0.95, na.rm = TRUE)
+#percentile_95_TTT <- quantile(attend_pat $Time_to_Treat, 0.95, na.rm = TRUE)
 
-# remove these probable data errors in attendance
-attend_pat <- filter(attend_pat ,Time_to_Treat <=percentile_95_TTT)
+# change data errors in attendance
+#attend_pat <- attend_pat |>
+#  mutate(Time_to_Treat = if_else(Time_to_Treat <=percentile_95_TTT, Time_to_Treat, NA))
 
 #Convert column to numeric
 attend_pat <- attend_pat %>%
@@ -263,10 +262,11 @@ attend_pat <- attend_pat %>%
 ### TTD clean
 
 # Calculate the 95th percentile TTD
-percentile_95_TTD <- quantile(attend_pat $Time_to_Discharge, 0.95, na.rm = TRUE)
+#percentile_95_TTD <- quantile(attend_pat $Time_to_Discharge, 0.95, na.rm = TRUE)
 
-# remove these probable data errors in attendance
-attend_pat <- filter(attend_pat ,Time_to_Discharge <=percentile_95_TTD)
+# change data errors in attendance
+#attend_pat <- attend_pat |>
+ # mutate(Time_to_Treat = if_else(Time_to_Discharge <=percentile_95_TTD, Time_to_Discharge, NA))
 
 #Convert column to numeric
 attend_pat <- attend_pat %>%
@@ -279,12 +279,13 @@ attend_pat <- attend_pat %>%
 attend_pat<- attend_pat%>%
   mutate(Resource_Time = Time_to_Discharge - Time_to_Treat) %>%
   select(Time_to_Treat, Resource_Time, everything())
-
-# Calculate the 95th percentile 
-percentile_95_resource<- quantile(attend_pat$Resource_Time, 0.95, na.rm = TRUE)
-
-# remove these probable data errors in attendance
-attend_pat<- filter(attend_pat,Resource_Time <=percentile_95_resource)
+# 
+# # Calculate the 95th percentile 
+# percentile_95_resource<- quantile(attend_pat$Resource_Time, 0.95, na.rm = TRUE)
+# 
+# # remove these probable data errors in attendance
+# attend_pat<- attend_pat |>
+#   mutate(Resource_Time = if_else(Resource_Time <=percentile_95_resource, Resource_Time, NA))
 
 #Convert column to numeric
 attend_pat <- attend_pat%>%
@@ -292,7 +293,8 @@ attend_pat <- attend_pat%>%
 
 # remove any values which are negative as it means the discharge time was before treatment time
 
-attend_pat <- filter (attend_pat,Resource_Time>= 0)
+attend_pat <- attend_pat |>
+  mutate(Resource_Time = if_else(Resource_Time < 0, NA, Resource_Time))
 
 
 ######### add months ago flag ######## 
@@ -313,12 +315,19 @@ six_mths_ago_pretty <- format(six_mths_ago, '%b %y')
 twelve_mths_ago_pretty <- format(twelve_mths_ago, '%b %y')
 eighteen_mths_ago_pretty <- format(eighteen_mths_ago, '%b %y')
 
+pre_cov_start <- ceiling_date(latest_full_mth %m-% months(66), 
+                              "month") - days(1)
+
+pre_cov_end <- ceiling_date(latest_full_mth %m-% months(60), 
+                            "month") - days(1)
+
 
 
 attend_pat<- attend_pat %>%
   mutate(mths_ago = case_when(mth > six_mths_ago ~ "a. Latest six mths",
                               mth > twelve_mths_ago ~ "b. Six to 12 mths",
                               mth > eighteen_mths_ago ~ "c.12 to 18 mths",
+                              mth > pre_cov_start & mth <= pre_cov_end ~ "d.covid comp",
                               .default = "outside_18_mths"
   )) 
 
@@ -331,6 +340,7 @@ attend_pat <- attend_pat |>
 attend_pat_cln <- attend_pat |>
   select ( "chiefcomplaintgrouping",
            "mth",
+           "mths_ago",
            "Time_to_Treat",
            "arrival_date",
            "ec_acuity_snomed_ct",
@@ -360,3 +370,5 @@ attend_pat_cln <- attend_pat |>
            "non_aa_resource",
            "appropriate",
            "total")      
+
+

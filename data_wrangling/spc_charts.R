@@ -7,20 +7,22 @@ data_time_filtered_resource <- attend_pat |>
 
 #tidy hospital name
 data_time_filtered_resource <- data_time_filtered_resource %>%
-  mutate(hospital_name = if_else(hospital_name == 'BRISTOL ROYAL HOSPITAL FOR CHILDREN', 'BRISTOL CHILDREN', hospital_name),
+  mutate(colour = if_else(hospital_name  == site, 0, 1),
+         hospital_name = str_remove(hospital_name,'THE '),
+    hospital_name = if_else(hospital_name == 'BRISTOL ROYAL HOSPITAL FOR CHILDREN', 'BRISTOL CHILDREN', hospital_name),
          hospital_name = str_remove(hospital_name, 'HOSPITAL'),
          hospital_name = if_else(str_count(hospital_name, pattern = ' ') > 1, word(hospital_name,1,2), hospital_name))
 
 
 
-##box plot by site
+#si version
 boxplot_allsites <- data_time_filtered_resource %>%
-  ggplot(aes(x=hospital_name, y= Resource_Time , group = site_name)) +
-  geom_boxplot(fill = "#41B6E6") +
+  ggplot(aes(x=reorder(hospital_name, -Resource_Time, na.rm = T), y= Resource_Time , group = site_name, fill = colour)) +
+  geom_boxplot(outlier.shape=NA) +
   
   labs(title = "Resource Time (Time to discharge - minus time to treatment)",
        subtitle = "",
-       caption = "For resource times within the 95th Percentile to account for extreme outliers",
+       caption = "For resource times outliers beyond 4th quartile have been removed.",
        x = "",  
        y = "Time in minutes") +
   theme_minimal(base_size = 12)+
@@ -35,6 +37,32 @@ boxplot_allsites <- data_time_filtered_resource %>%
   theme(axis.line = element_line(color = "grey"))+
   theme(axis.text.x = element_text(angle = 90))+
   theme(legend.position = "")
+
+
+# 
+# 
+# ##box plot by site
+# boxplot_allsites <- data_time_filtered_resource %>%
+#   ggplot(aes(x=hospital_name, y= Resource_Time , group = site_name)) +
+#   geom_boxplot(fill = "#41B6E6") +
+#   
+#   labs(title = "Resource Time (Time to discharge - minus time to treatment)",
+#        subtitle = "",
+#        caption = "For resource times within the 95th Percentile to account for extreme outliers",
+#        x = "",  
+#        y = "Time in minutes") +
+#   theme_minimal(base_size = 12)+
+#   theme(strip.text.x = element_text(size = 11, colour = "Black", face ="bold"))+
+#   theme(panel.grid.minor = element_blank())+
+#   theme(panel.border=element_blank())+
+#   theme( panel.grid.major = element_blank ())+ 
+#   theme(plot.title = element_text(size = 13,
+#                                   face = "bold",
+#                                   margin = margin(10,0,10,0),
+#                                   family = "sans"))+
+#   theme(axis.line = element_line(color = "grey"))+
+#   theme(axis.text.x = element_text(angle = 90))+
+#   theme(legend.position = "")
 
 
 # filter for site
