@@ -1,7 +1,7 @@
 
 # Resource Time dataframe
 
-data_time_filtered_resource <- attend_pat |>
+data_time_filtered_resource <- attend_pat_cln |>
   filter(non_aa_resource == 1)
 
 
@@ -17,9 +17,12 @@ data_time_filtered_resource <- data_time_filtered_resource %>%
 
 #si version
 boxplot_allsites <- data_time_filtered_resource %>%
-  ggplot(aes(x=reorder(hospital_name, -Resource_Time, na.rm = T), y= Resource_Time , group = site_name, fill = colour)) +
+  filter(!is.na(Resource_Time),
+         Resource_Time < 5760,
+         !is.na(hospital_name)) |>
+  ggplot(aes(x=reorder(hospital_name, -Resource_Time, na.rm = T), y= Resource_Time , group = hospital_name, fill = colour)) +
   geom_boxplot(outlier.shape=NA) +
-  
+  ylim(0, 300) +
   labs(title = "Resource Time (Time to discharge - minus time to treatment)",
        subtitle = "",
        caption = "For resource times outliers beyond 4th quartile have been removed.",
@@ -68,14 +71,16 @@ boxplot_allsites <- data_time_filtered_resource %>%
 # filter for site
 
 data_time_filtered_resource <- data_time_filtered_resource %>%
-  filter(site_name == i) 
+  filter(site_name == i,
+         mths_ago != 'outside_18_mths') |>
+  mutate(if_else(mths_ago == 'd.covid comp', 'd. Pre covid comparison', mths_ago))
 
 ##box plot by site and month split - only works properly in loop
 boxplot_month <- data_time_filtered_resource %>%
   ggplot(aes(x=mths_ago, y= Resource_Time , group = mths_ago,fill=mths_ago)) +
   geom_boxplot() +
-  scale_fill_manual(values = c("#005EB8","#41B6E6","#0072CE","grey"))+
-  
+  scale_fill_manual(values = c("#005EB8","#41B6E6","#0072CE", "orange", "grey")) +
+  ylim(0, 300) +
   labs(title = "Resource Time (Time to discharge - minus time to treatment)",
        subtitle = "",
        caption = "For resource times within the 95th Percentile to account for extreme outliers",
@@ -94,50 +99,50 @@ boxplot_month <- data_time_filtered_resource %>%
   theme(axis.text.x = element_text(angle = 90))+
   theme(legend.position = "")
 
-
-### Site level SPC chart for resource time
-
-data_time_resource_runchart_site <-  data_time_filtered_resource %>%
-  group_by(site_name, arrival_week)%>%
-  summarise(median(Resource_Time))
-
-
-### SPC plots
-
-plot_obj <- ptd_spc(
-  data_time_resource_runchart_site,
-  value_field = `median(Resource_Time)`,
-  date_field = arrival_week,
-  facet_field = site_name,
-  improvement_direction =  "decrease"
-)
-
-
-plot_SPC_Resource_Median <- ptd_create_ggplot(
-  plot_obj,
-  icons_position = 'none',
-  x_axis_date_format = "%b-%y",
-  x_axis_breaks = "3 months",
-  percentage_y_axis = FALSE,
-  point_size = 4,
-  y_axis_label = 'Time in minutes',
-  x_axis_label = "",
-  main_title    = "Median Resource Time"
-)
-
-plot_SPC_Resource_Median <- plot_SPC_Resource_Median+ 
-  theme_minimal(base_size = 16)+
-  #theme(strip.text.x = element_text(size = 15, colour = "Black", face ="bold"))
-  theme(panel.grid.minor = element_blank())+
-  theme(panel.border=element_blank())+
-  theme(plot.title = element_text(size = 13,
-                                  face = "bold",
-                                  margin = margin(10,0,10,0),
-                                  family = "sans"))+
-  theme(axis.line = element_line(color = "grey"))+
-  theme(axis.text.x = element_text(angle = 90))+
-  theme(legend.position = "top")+
-  labs(caption="")
+# 
+# ### Site level SPC chart for resource time
+# 
+# data_time_resource_runchart_site <-  data_time_filtered_resource %>%
+#   group_by(site_name, mth)%>%
+#   summarise(median(Resource_Time))
+# 
+# 
+# ### SPC plots
+# 
+# plot_obj <- ptd_spc(
+#   data_time_resource_runchart_site,
+#   value_field = `median(Resource_Time)`,
+#   date_field = arrival_week,
+#   facet_field = site_name,
+#   improvement_direction =  "decrease"
+# )
+# 
+# 
+# plot_SPC_Resource_Median <- ptd_create_ggplot(
+#   plot_obj,
+#   icons_position = 'none',
+#   x_axis_date_format = "%b-%y",
+#   x_axis_breaks = "3 months",
+#   percentage_y_axis = FALSE,
+#   point_size = 4,
+#   y_axis_label = 'Time in minutes',
+#   x_axis_label = "",
+#   main_title    = "Median Resource Time"
+# )
+# 
+# plot_SPC_Resource_Median <- plot_SPC_Resource_Median+ 
+#   theme_minimal(base_size = 16)+
+#   #theme(strip.text.x = element_text(size = 15, colour = "Black", face ="bold"))
+#   theme(panel.grid.minor = element_blank())+
+#   theme(panel.border=element_blank())+
+#   theme(plot.title = element_text(size = 13,
+#                                   face = "bold",
+#                                   margin = margin(10,0,10,0),
+#                                   family = "sans"))+
+#   theme(axis.line = element_line(color = "grey"))+
+#   theme(axis.text.x = element_text(angle = 90))+
+#   theme(legend.position = "top")+
+#   labs(caption="")
 
 
 #######################
@@ -168,7 +173,9 @@ sub_setdata_CC <- data_CC %>%
 
 # filter for site
 sub_setdata_CC <- sub_setdata_CC %>%
-  filter(site_name == i)
+  filter(site_name == i,
+         der_activity_month >= eighteen_mths_ago,
+         der_activity_month <= latest_full_mth)
 
 
 ### SW SPC plots
@@ -190,10 +197,10 @@ CG_SPC<- ptd_create_ggplot(
   x_axis_breaks = "2 months",
   percentage_y_axis = FALSE,
   fixed_y_axis_multiple = FALSE,
-  point_size = 4,
+  point_size = 2,
   y_axis_label = 'Attendances',
   x_axis_label = NULL,
-  main_title    = "Attendances by Chief Complaint Group"
+  main_title    = "Divertable Attendances by Chief Complaint Group"
 )
 
 CG_SPC <- CG_SPC+ 

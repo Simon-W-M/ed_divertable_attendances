@@ -5,15 +5,14 @@ site<- i
 
 presentaion_popular <- attend_pat |>
   #filter(!!sym(feature) == var) |>
-  filter(arrival_week > six_mths_ago,
-         non_aa_resource == 1) |>
+  filter(arrival_week > six_mths_ago, 
+         chiefcomplaintgrouping != 'Not applicable to child terms') |>
   summarise(
     attends = n(),
     .by = c(chiefcomplaintgrouping, hospital_name)
   ) |>
   mutate(rank = dense_rank(-attends),
-         .by = hospital_name) |>
-  filter(rank <= 6)
+         .by = hospital_name) 
 
 presentaion_popular_site <- presentaion_popular |>
   filter(hospital_name == site) |>
@@ -70,7 +69,7 @@ sum_intro <- attend_pat_cln |>
             non_aa_res = sum(non_aa_resource, na.rm=T),
             admits = sum(if_else(discharged== 0,1,0)),
             approp = sum(appropriate, na.rm=T),
-            tot_t = sum(Resource_Time),
+            tot_t = sum(Resource_Time, na.rm = T),
             avoid_attend_t = sum(aa_time, na.rm=T),
             non_aa_res_t = sum(non_aa_res_time, na.rm=T),
             admits_t = sum(admit_time, na.rm=T),
@@ -96,6 +95,10 @@ sum_intro <- attend_pat_cln |>
          mean_t_day) |>
   adorn_totals(where = 'row')
 
+is.nan.data.frame <- function(x)
+  do.call(cbind, lapply(x, is.nan))
+
+sum_intro[is.nan(sum_intro)] <- 0
 
 data_summary_table <-sum_intro |> 
   gt() |>
@@ -127,6 +130,12 @@ data_summary_table <-sum_intro |>
                 "mean_t_day"),
     alpha = 0.5,
     palette = "#FFB81C"
+  ) |>
+  data_color(
+    columns = c("tot",
+                "tot_t"),
+    alpha = 0.5,
+    palette = "#E8EDEE"
   ) |>
   tab_spanner(label = "Number of attendances", columns = c(
     avoid_attend,
@@ -247,7 +256,7 @@ filter_presentation_tag_dates <- function(data, presentation) {
 #   geom_line()
 
 # function to produce change summary
-change_summary <- function(data, presentation, feature, var, hospital) {
+change_summary <- function(data, presentation, feature, var, hospital, value) {
   dat_sum <- filter_presentation_tag_dates(data, presentation)
 
   change_sum <- dat_sum |>
@@ -276,18 +285,19 @@ change_summary <- function(data, presentation, feature, var, hospital) {
            perc_change_t_c = if_else(perc_change_t_c> 120, 120, perc_change_t_c))
   change_sum
 }
-
-change_sum2<- change_summary(total_attend_summary,
-                            'Total',
-                            'total',
-                            '1',
-                            i)
+# 
+# change_sum2<- change_summary(total_attend_summary,
+#                             'Total',
+#                             'total',
+#                             '1',
+#                             i,
+#                             'perc_change')
 
 
 
 change_plot <- function(data, presentation, feature, var, hospital, title, value) {
 
-  change_sum <- change_summary (data, presentation, feature, var, hospital)
+  change_sum <- change_summary (data, presentation, feature, var, hospital, value)
   
   change_sum |>
     mutate(hospital_name = if_else(hospital_name == 'BRISTOL ROYAL HOSPITAL FOR CHILDREN', 'BRISTOL CHILDREN', hospital_name),
@@ -300,7 +310,7 @@ change_plot <- function(data, presentation, feature, var, hospital, title, value
            fill = col)) +
   geom_col() + 
   theme_minimal() + 
-  ggtitle(title) +
+  ggtitle(paste0(presentation, ': ', title)) +
   theme(legend.position = 'NA') +
   ylab('') +
     xlab('Percentage change') +
@@ -316,101 +326,111 @@ change_plot <- function(data, presentation, feature, var, hospital, title, value
 #(data, presentation, feature, var, hospital, title, value) 
 
 #change_sum <- change_summary (total_attend_summary, 'Total', 'total', '1', i)
+# 
+# # 
+# change_plot(
+#   total_attend_summary,
+#  'Total',
+#  'total', '1',
+#  site,
+#   'Percentage change of pre covid type 1 walk admissions',
+#  'perc_change_c')
+# 
+# change_plot(
+#   attend_pat_cln,
+#   presentaion_popular_site$chiefcomplaintgrouping[1],
+#   'total', '1',
+#   site,
+#   'Percentage change of pre covid type 1 walk admissions',
+#   'perc_change_c')
+
+
+#
+# change_plot(
+#   data,
+#   presentaion_popular_site$chiefcomplaintgrouping[1],
+#   'total',
+#   '1',
+#   site,
+#   paste0(presentaion_popular_site$chiefcomplaintgrouping[1]),
+#   'perc_change')
+#
+#
+# 
+# 
+# plot_change <- function(data, site, feature, val, value) {
+#   presentaion_popular_site <- presentaion_popular |>
+#     filter(hospital_name == site)
+# 
+#   
+#   a <- change_plot(
+#     total_attend_summary,
+#     'Total',
+#     feature, val,
+#     site,
+#     'Total',
+#     value
+#   )
+#   
+#   b <- change_plot(
+#     data,
+#     presentaion_popular_site$chiefcomplaintgrouping[1],
+#     feature, val,
+#     site,
+#     paste0(presentaion_popular_site$chiefcomplaintgrouping[1]),
+#     value
+#   )
+# 
+#   c <- change_plot(
+#     data,
+#     presentaion_popular_site$chiefcomplaintgrouping[2],
+#     feature, val,
+#     site,
+#     paste0(presentaion_popular_site$chiefcomplaintgrouping[2]),
+#     value
+#   )
+# 
+#   d <- change_plot(
+#     data,
+#     presentaion_popular_site$chiefcomplaintgrouping[3],
+#     feature, val,
+#     site,
+#     paste0(presentaion_popular_site$chiefcomplaintgrouping[3]),
+#     value
+#   )
+# 
+#   e <- change_plot(
+#     data,
+#     presentaion_popular_site$chiefcomplaintgrouping[4],
+#     feature, val,
+#     site,
+#     paste0(presentaion_popular_site$chiefcomplaintgrouping[4]),
+#     value
+#   )
+# 
+#   f <- change_plot(
+#     data,
+#     presentaion_popular_site$chiefcomplaintgrouping[5],
+#     feature, val,
+#     site,
+#     paste0(presentaion_popular_site$chiefcomplaintgrouping[5]),
+#     value
+#   )
+# 
+# 
+#   #plot_grid(a, b, c, d, e, f, label_y = 1, rel_heights = c(0.2, .20, .60), nrow = 2)
+#   grid.arrange(a, b, c, d, e, f,  nrow = 2)
+# }
+# 
+
 
 # 
-change_plot(
-  total_attend_summary,
- 'Total',
- 'total', '1',
- site,
-  'Totals',
- 'perc_change')
-# 
-change_plot(
-  data,
-  presentaion_popular_site$chiefcomplaintgrouping[1],
-  'total',
-  '1',
-  site,
-  paste0(presentaion_popular_site$chiefcomplaintgrouping[1]),
-  'perc_change')
-# 
-# 
-
-
-plot_change <- function(data, site, feature, val, value) {
-  presentaion_popular_site <- presentaion_popular |>
-    filter(hospital_name == site)
-
-  
-  a <- change_plot(
-    total_attend_summary,
-    'Total',
-    feature, val,
-    site,
-    'Total',
-    value
-  )
-  
-  b <- change_plot(
-    data,
-    presentaion_popular_site$chiefcomplaintgrouping[1],
-    feature, val,
-    site,
-    paste0(presentaion_popular_site$chiefcomplaintgrouping[1]),
-    value
-  )
-
-  c <- change_plot(
-    data,
-    presentaion_popular_site$chiefcomplaintgrouping[2],
-    feature, val,
-    site,
-    paste0(presentaion_popular_site$chiefcomplaintgrouping[2]),
-    value
-  )
-
-  d <- change_plot(
-    data,
-    presentaion_popular_site$chiefcomplaintgrouping[3],
-    feature, val,
-    site,
-    paste0(presentaion_popular_site$chiefcomplaintgrouping[3]),
-    value
-  )
-
-  e <- change_plot(
-    data,
-    presentaion_popular_site$chiefcomplaintgrouping[4],
-    feature, val,
-    site,
-    paste0(presentaion_popular_site$chiefcomplaintgrouping[4]),
-    value
-  )
-
-  f <- change_plot(
-    data,
-    presentaion_popular_site$chiefcomplaintgrouping[5],
-    feature, val,
-    site,
-    paste0(presentaion_popular_site$chiefcomplaintgrouping[5]),
-    value
-  )
-
-
-  #plot_grid(a, b, c, d, e, f, label_y = 1, rel_heights = c(0.2, .20, .60), nrow = 2)
-  grid.arrange(a, b, c, d, e, f,  nrow = 2)
-}
-
-
-
-
-bench_da <- plot_change(attend_pat_cln, i, 'non_aa_resource', '1')
-bench_aa <- plot_change(attend_pat_cln, i, 'isAvoidable', 'TRUE')
-bench_ad <- plot_change(attend_pat_cln, i, 'discharged', '0')
-bench_to <- plot_change(attend_pat_cln, i, 'total', '1', 'perc_change_c')
-bench_to <- plot_change(attend_pat_cln, i, 'total', '1', 'perc_change_t_c')
-bench_ap <- plot_change(attend_pat_cln, i, 'appropriate', '1')
+# bench_da <- plot_change(attend_pat_cln, i, 'non_aa_resource', '1')
+# bench_aa <- plot_change(attend_pat_cln, i, 'isAvoidable', 'TRUE')
+# bench_ad <- plot_change(attend_pat_cln, i, 'discharged', '0')
+# bench_to <- plot_change(attend_pat_cln, i, 'total', '1', 'perc_change_c')
+# bench_to <- plot_change(attend_pat_cln, i, 'total', '1', 'perc_change_t_c')
+# bench_ap <- plot_change(attend_pat_cln, i, 'appropriate', '1')
 
 # site <- site_list
 
@@ -463,8 +483,8 @@ change_plot_ts <- function(data, chief_com, attends_or_time) {
     if_else((peroids_av_late$mn[1] - peroids_av$mn[1]) / peroids_av_late$mn[1] < 0, ' Decrease', ' Increase')
   )
   
-  label_past <- paste0('Equivalent pre covid mean ', prettyNum(round(peroids_av$mn[1],1), big.mark = ','))
-  label_pres <- paste0('Latest 6 month mean ', prettyNum(round(peroids_av_late$mn[1],1), big.mark = ','))
+  label_past <- paste0('Equivalent pre covid mean ', prettyNum(round(peroids_av$mn[1],1), big.mark = ','),'       ')
+  label_pres <- paste0('Latest 6 month mean ', prettyNum(round(peroids_av_late$mn[1],1), big.mark = ','), '             ')
   cap <- if_else(attends_or_time == 'attends', 
                  'Total number of monthly attendances (Walk in)',
                  'Please note: Data quality for times is considered poor')
@@ -485,11 +505,11 @@ change_plot_ts <- function(data, chief_com, attends_or_time) {
     theme_minimal() +
     geom_line(
       data = peroids_av, aes(x = mth, y = mn), linetype = "dashed",
-      size = 1
+      linewidth = 1
     ) +
     geom_line(
       data = peroids_av_late, aes(x = mth, y = mn), linetype = "dashed",
-      size = 1
+      linewidth = 1
     ) +
     annotate("rect",
              xmin = pre_cov_start, xmax = pre_cov_end,
@@ -512,12 +532,16 @@ change_plot_ts <- function(data, chief_com, attends_or_time) {
              label = label_pres
     ) +
     scale_x_date(NULL,
-                 breaks = breaks_width("4 months"),
+                 breaks = breaks_width("6 months"),
                  labels = label_date("%b %y")
     ) +
     geom_textpath(
       data = change_join, aes(x = mth, y = mn),
-      arrow = arrow(length = unit(2.5, 'mm'),  ends = 'both', type = 'open'), colour = "blue", label = perc_change,
+      arrow = arrow(length = unit(2.5, 'mm'),  
+                    ends = 'both', 
+                    type = 'open'), 
+      colour = "blue", 
+      label = perc_change,
       vjust = -0.2) +
     labs(title = paste0(chief_com,": A&E Type 1 walk in attendances"),
          subtitle = y_lab,

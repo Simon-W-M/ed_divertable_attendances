@@ -75,16 +75,107 @@ We can also observe that this change is different across different presentation 
 ## Comparison of increase of number of attendances and time (total - wait) {.tabset .tabset-fade .tabset-pills}
 
 ### Total type 1 walk in
-```{r, echo=FALSE, fig.height=12,fig.width = 16}
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
 grid.arrange(change_plot_ts(attend_pat_cln, 'Total', 'attends'),
              change_plot_ts(attend_pat_cln, 'Total', 'resource_time'),
              ncol = 2)
 ```
 
 ### `r presentaion_popular_site$chiefcomplaintgrouping[1]`
-```{r, echo=FALSE, fig.height=12,fig.width = 16}
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
 grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[1], 'attends'),
              change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[1], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[2]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[2], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[2], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[3]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[3], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[3], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[4]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[4], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[4], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[5]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[5], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[5], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[6]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[6], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[6], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[7]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[7], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[7], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[8]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[8], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[8], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[9]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[9], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[9], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[10]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[10], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[10], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[11]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[11], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[11], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[12]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[12], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[12], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[13]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[13], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[13], 'resource_time'),
+             ncol = 2)
+```
+
+### `r presentaion_popular_site$chiefcomplaintgrouping[14]`
+```{r, echo=FALSE, fig.height=8,fig.width = 16}
+grid.arrange(change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[14], 'attends'),
+             change_plot_ts(attend_pat_cln, presentaion_popular_site$chiefcomplaintgrouping[14], 'resource_time'),
              ncol = 2)
 ```
 
@@ -97,42 +188,326 @@ We are most interested in this study for the change in divertible attendances.Th
 
 This broadly matches the previous charts, except the previous charts are accumulated the 6 month average whilst these charts are based on the aggregate for the 6 months. 
 
+**NOTE** *Percentage change has been capped at 120% in these graphs in order to maintain scale*
+
 ### Total Attendances
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}
-bench_to
+a <- change_plot(
+  total_attend_summary,
+ 'Total',
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
 
+b <- change_plot(
+  total_attend_summary,
+ 'Total',
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
 
+grid.arrange(a,b, nrow = 1)
 ```
 
-### Avoidable Attendances
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[1]`
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}
-bench_aa
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[1],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
 
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[1],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
 
+grid.arrange(a,b, nrow = 1)
 ```
 
-### Divertible Attendances
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[2]`
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}
-bench_da
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[2],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
 
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[2],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
 
+grid.arrange(a,b, nrow = 1)
 ```
 
 
-### Appropriate Attendances (Discharged)
+###  `r presentaion_popular_site$chiefcomplaintgrouping[3]`
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}
-bench_ap 
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[3],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
 
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[3],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
 
+grid.arrange(a,b, nrow = 1)
 ```
 
-
-### Appropriate Attendances (Admissions)
+###  `r presentaion_popular_site$chiefcomplaintgrouping[4]`
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}
-bench_ad 
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[4],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
 
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[4],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
 
+grid.arrange(a,b, nrow = 1)
 ```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[5]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[5],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[5],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[6]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[6],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[6],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[7]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[7],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[7],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[8]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[8],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[8],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[9]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[9],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[9],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[10]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[10],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[10],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[11]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[11],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[11],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[12]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[12],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[12],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[13]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[13],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[13],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
+###  `r presentaion_popular_site$chiefcomplaintgrouping[14]`
+```{r, echo=FALSE, fig.height=12,fig.width = 16}
+a <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[14],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in admissions',
+ 'perc_change_c')
+
+b <- change_plot(
+  attend_pat_cln,
+  presentaion_popular_site$chiefcomplaintgrouping[14],
+ 'total', '1',
+ site,
+  'Percentage change of pre covid type 1 walk in time (total - wait)',
+ 'perc_change_t_c')
+
+grid.arrange(a,b, nrow = 1)
+```
+
 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -144,15 +519,21 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </div>
 
 
-## Overview by site
+## Overview by site - patient cohorts
+
+As noted above we have further explored the data and split these patients into further cohorts. 
+
+This tables breaks down the last 6 months of attendances into these cohorts to identify, the 'avoidable', 'divertable', 'appropriate' and 'admissions'.
+
 ```{r, echo=FALSE, fig.height=12,fig.width = 16}
 data_summary_table
 
 
 ```
 
-
 ## Resource time {.tabset .tabset-fade .tabset-pills}
+
+We further break this down to look at the range in time these patients utilise in department.  We have compared this range of time to the previous 6 and 12 months and to a similar pre covid period. 
 
 ### Resource time site comparison
 
@@ -184,32 +565,30 @@ boxplot_allsites
 
 ### Resource time site level time comparison for 'divertible patients'
 
-This shows the distribution of resource time over six month time periods. 
+This shows the distribution of resource time over six month time periods.
 
-```{r echo=FALSE, results='hide',fig.height=6,fig.width = 12,message=FALSE, warnings = FALSE}
+Not has time utilised by these patients has increased in comparison to pre covid numbers.
+
+```{r echo=FALSE, warning = FALSE, results='hide',fig.height=6,fig.width = 12,message=FALSE, warnings = FALSE}
 
 boxplot_month
 
 ```
 
-### Resource time SPC for 'divertible patients'
 
-The below SPC chart shows the median resource time per patient over the
-latest 18 month for this site.
-
-```{r echo=FALSE, results='hide', fig.height=6,fig.width = 12,message=FALSE, warnings = FALSE}
-plot_SPC_Resource_Median
-
-```
-
-Statistical Process Control charts use statistics to identify patterns and anomalies that may be worth investigating as they are not caused by common cause variation within the data. 
 
 ## Chief Complaint
 
-The below SPC chart shows the number of attendances by the top 6 
-complaint times over the latest 18 month for this site.
+The below SPC chart shows the number of attendances by 
+complaint types over the latest 18 month for this site.
 
-```{r echo=FALSE, results='hide',fig.height=6, fig.width = 12,message=FALSE, warnings = FALSE}
+Statistical Process Control charts use statistics to identify patterns and anomalies that may be worth investigating as they are not caused by common cause variation within the data. 
+
+This will help us identify if there are any trend in our divertable attendances, to see if this co hort is increasing,  decreasing or static.  
+
+Where we see yellow dots, this indicates an increasing trend and blue dots indicate a decreasing trend, or the they can represent unusual activity levels.
+
+```{r echo=FALSE, warning = FALSE, results='hide',fig.height=9, fig.width = 12,message=FALSE, warnings = FALSE}
 CG_SPC
 
 ```
@@ -314,6 +693,16 @@ create_cluster_table(chief_compaints_list[6])
 `r comments(chief_compaints_list[1])[6]`  
 
 `r comments(chief_compaints_list[1])[6]`  
+
+## Recommendations
+
+It is hoped that this report helps to understand the pressure within departments and what are the causes of pressure.  The flow of patients due to the increased times in ward is no doubt contributing to crowding, yet actual numbers of attendances are not always significantly increased.
+
+The cluster analysis may open some possibilities and understanding to some sets of patients that may b e able to be diverted away from emergency departments.
+
+Additional analysis around pathways, flow, demand and capacity would also assist in understanding where bottlenecks may be occurring and what alternatives may be available to reduce time in department.
+
+This would have a impact on throughput as well as being benefitiacial to quality and patient outcomes.
 
 
 
