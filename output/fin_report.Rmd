@@ -584,7 +584,7 @@ complaint types over the latest 18 month for this site.
 
 Statistical Process Control charts use statistics to identify patterns and anomalies that may be worth investigating as they are not caused by common cause variation within the data. 
 
-This will help us identify if there are any trend in our divertable attendances, to see if this co hort is increasing,  decreasing or static.  
+This will help us identify if there are any trend in our **divertible attendances**, to see if this co hort is increasing,  decreasing or static.  
 
 Where we see yellow dots, this indicates an increasing trend and blue dots indicate a decreasing trend, or the they can represent unusual activity levels.
 

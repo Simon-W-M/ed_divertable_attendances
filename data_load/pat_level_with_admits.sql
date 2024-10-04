@@ -56,5 +56,5 @@ AND (EC_AttendanceCategory <> '4')
 AND (EC_Department_Type = '01')  -- Just type 1 (query why Weston is still showing).
 --and EC_Chief_Complaint_SNOMED_CT IN ('127278005', '127279002', '29857009',  '21522001',  '82271004',  '267036007', '386661006', '10601006', '312608009')
 and provider_code in ('RH5','RTE','RA7','RDZ','R1J','R0D','RBZ','RNZ','REF','RDY','RA4','AXG','F7H7R','RA9','RD3','RBD','RTE03','RD1','RTE01','RH8',
-'RN3','RVJ','RK9','RTQ','RA3','NQT5H','NTPH1')
+'RN3','RVJ','RK9','RTQ','RA3','NQT5H','NTPH1', 'RBA', 'RA4')
 --AND [Discharge_Destination_SNOMED_CT] in ('306689006','306691003','306694006','306705005','50861005') -- This is just patients who are discharged

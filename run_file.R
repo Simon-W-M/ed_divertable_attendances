@@ -25,23 +25,23 @@ source(paste0(path_data_wrang,'data_wrang_update travel.R'))
 # either comment or uncomment sites to run reports for
 site_list <- c(#"ROYAL DEVON & EXETER HOSPITAL (WONFORD)",
                #"WESTON GENERAL HOSPITAL",
-               "CHELTENHAM GENERAL HOSPITAL",
-               "ROYAL CORNWALL HOSPITAL (TRELISKE)",
-               "TORBAY HOSPITAL",
-               "NORTH DEVON DISTRICT HOSPITAL",
-               "GLOUCESTERSHIRE ROYAL HOSPITAL",
-               "DORSET COUNTY HOSPITAL",
-               "POOLE HOSPITAL",##
-               "SALISBURY DISTRICT HOSPITAL",
-               "ROYAL BOURNEMOUTH HOSPITAL",
-               "ROYAL UNITED HOSPITAL",
-               "YEOVIL DISTRICT HOSPITAL",
-               "BRISTOL ROYAL INFIRMARY",
-               "DERRIFORD HOSPITAL",
-               "THE GREAT WESTERN HOSPITAL",
+              # "CHELTENHAM GENERAL HOSPITAL",
+              # "ROYAL CORNWALL HOSPITAL (TRELISKE)",
+               #"TORBAY HOSPITAL", 
+               "NORTH DEVON DISTRICT HOSPITAL") #, ##
+               # "GLOUCESTERSHIRE ROYAL HOSPITAL",
+               # "DORSET COUNTY HOSPITAL",
+               # "POOLE HOSPITAL",##
+               # "SALISBURY DISTRICT HOSPITAL",
+               # "ROYAL BOURNEMOUTH HOSPITAL",
+               # "ROYAL UNITED HOSPITAL",
+               # "YEOVIL DISTRICT HOSPITAL",
+               # "BRISTOL ROYAL INFIRMARY",
+               # "DERRIFORD HOSPITAL",
+               # "THE GREAT WESTERN HOSPITAL",
                #"BRISTOL ROYAL HOSPITAL FOR CHILDREN")
-               "SOUTHMEAD HOSPITAL",
-               "MUSGROVE PARK HOSPITAL")
+             #  "SOUTHMEAD HOSPITAL")#,
+               #"MUSGROVE PARK HOSPITAL")
 
 
 options(dplyr.summarise.inform = FALSE)

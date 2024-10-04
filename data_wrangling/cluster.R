@@ -41,7 +41,11 @@ clust_data_filter <- function (data, site, chief_com) {
 
   data}
 
-chief_compaints_list <- presentaion_popular$chiefcomplaintgrouping[presentaion_popular$hospital_name == i]
+chief_compaints_list <- presentaion_popular |>
+  filter(hospital_name == i) |>
+  arrange(rank)
+
+chief_compaints_list <- chief_compaints_list$chiefcomplaintgrouping
 
 
 
@@ -77,10 +81,10 @@ overall_sum <- filtered_data |>
   #             names_prefix = "sex_count_") |>
 
   if (!"non_aa_resource_NA" %in% colnames(overall_sum)) {overall_sum$non_aa_resource_NA <- NA}
-  if (!"age_group_19-45" %in% colnames(overall_sum)) {overall_sum$`19-45` <- NA}
-  if (!"age_group_45-65" %in% colnames(overall_sum)) {overall_sum$`45-65` <- NA}
-  if (!"age_group_66-85" %in% colnames(overall_sum)) {overall_sum$`66-85` <- NA}
-  if (!"age_group_86 +" %in% colnames(overall_sum)) {overall_sum$`86 +` <- NA}
+  if (!'19-45' %in% colnames(overall_sum)) {overall_sum$`19-45` <- NA}
+  if (!'45-65' %in% colnames(overall_sum)) {overall_sum$`45-65` <- NA}
+  if (!'66-85' %in% colnames(overall_sum)) {overall_sum$`66-85` <- NA}
+  if (!'86 +' %in% colnames(overall_sum)) {overall_sum$`86 +` <- NA}
 
 
   overall_sum <- overall_sum |>
@@ -112,10 +116,10 @@ divert_sum <- filtered_data |>
 
 if (!"ooo" %in% colnames(divert_sum)) {divert_sum$ooo <- NA}
 if (!"wkend" %in% colnames(divert_sum)) {divert_sum$wkend <- NA}
-if (!"age_group_19-45" %in% colnames(divert_sum)) {divert_sum$`age_group_19-45` <- NA}
-if (!"age_group_45-65" %in% colnames(divert_sum)) {divert_sum$`age_group_45-65` <- NA}
-if (!"age_group_66-85" %in% colnames(divert_sum)) {divert_sum$`age_group_66-85` <- NA}
-if (!"age_group_86 +" %in% colnames(divert_sum)) {divert_sum$`age_group_86 +` <- NA}
+if (!"19-45" %in% colnames(divert_sum)) {divert_sum$`19-45` <- NA}
+if (!"45-65" %in% colnames(divert_sum)) {divert_sum$`45-65` <- NA}
+if (!"66-85" %in% colnames(divert_sum)) {divert_sum$`66-85` <- NA}
+if (!"86 +" %in% colnames(divert_sum)) {divert_sum$`86 +` <- NA}
 
   #mutate(imd_count = 1) |>
   # pivot_wider(names_from = c(imd_quint), 
@@ -505,6 +509,10 @@ table_clust
 }
 
 
+create_cluster_table <- possibly(create_cluster_table, 
+         'There is insufficient data to cluster these patients')
+
+create_cluster_table(chief_compaints_list[1]) 
 #create_cluster_table(chief_compaints_list[1]) 
 
 #tst <- chief_compaints_list[1]
@@ -606,6 +614,11 @@ comb_com
 }
 
 comments(chief_compaints_list[1])
+
+
+comments <- possibly(comments,
+                     'There is insufficient data to cluster these patients')
+
 
 # 
 # 
